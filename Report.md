@@ -108,7 +108,11 @@ In a red-black tree:
 
 
 
+
+
 **References**
 Figure 1: Using https://dbdiagram.io/home to create my own db diagram
-
 Figure 2: https://builtin.com/data-science/b-tree-index
+Figure 3: https://www.geeksforgeeks.org/introduction-to-red-black-tree/
+
+
