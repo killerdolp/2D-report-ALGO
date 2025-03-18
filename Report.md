@@ -195,10 +195,12 @@ FUNCTION ROTATE_RIGHT(node):
 This are the 2 types of rotations.
 - The left rotation helps to balance right heavy tree by shifting the node down and bring the right child of the node up
 - The right rotation helps to balance left heavy trees by shifting the node down and bring the left child up of the node.
-<div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
-    <img src="telegram-cloud-photo-size-5-6256013457883251212-y.jpg" alt="Image 1" width="300">
-    <img src="telegram-cloud-photo-size-5-6256013457883251213-y.jpg" alt="Image 2" width="300">
+
+<div align="center">
+    <img src="rotateleft.jpg" alt="Image 1" width="35%">
+    <img src="rotateright.jpg" alt="Image 2" width="35%">
 </div>
+
 
 (Change the colour of the picture and make only A highlight red)
 
