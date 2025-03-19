@@ -42,11 +42,11 @@
 ---
 # Executive summary
 
-The **Tier Membership** system consists of four tiers: **Bronze, Silver, Gold, and Platinum**. Every member starts at the Bronze tier with 0 points. To advance to Silver, a user must accumulate at least **500 points**. However, progression to **Gold** or **Platinum** is competitive and only the top users each week will promote into these tiers, based on a weekly ranking system.
+The **Tier Membership** system consists of four tiers: **Bronze, Silver, Gold, and Platinum**. Every member starts at the Bronze tier with 0 points. To advance to Silver, a user must accumulate at least **500 points**. However, progression to **Gold** or **Platinum** is competitive and only the top users each week will be able to promote into these tiers, based on a weekly ranking system.
 
-The our proposed solution implements a relational database with 2 tables: a **User table** and a **Reward Point table**. The database's underlying data structure ensures an **O(1)** time complexity whenever the user retrieves their own points. Furthermore , the **User table** would make use of database indexing to ensure the system lookups would be **O(log n)**.
+Our proposed solution implements a relational database with 2 tables: a **User table** and a **Reward Points table**. The database's underlying data structure ensures an **O(1)** time complexity whenever the user retrieves their own points. Furthermore, the **User table** would use database indexing to ensure the system lookups would be **O(log n)**.
 
-The **Reward Points table** would be implemented as a **Red and Black Tree**, which is a type of self balancing Binary Search Tree (BST). This algorithm provides efficient sorting and searching while maintaining a balanced tree structure, ensuring O(log n) time complexity for search operations. The Red Black Tree offers a better balance between search and update performance as compared to the AVL tree, which has faster lookups at the cost of more rotations needed during update operations.
+The **Reward Points table** would be implemented as a **Red Black Tree**, which is a type of self-balancing Binary Search Tree (BST). This algorithm provides efficient sorting and searching while maintaining a balanced tree structure, ensuring O(log n) time complexity for search operations. The Red Black Tree offers a better balance between search and update performance as compared to the AVL tree, which has faster lookups at the cost of more rotations to maintain the tree's balance during insertions and deletions.
 
 ---
 # Database diagram
@@ -55,44 +55,43 @@ The **Reward Points table** would be implemented as a **Red and Black Tree**, wh
 <img alt="center" src="Screenshot 2025-03-13 at 7.58.30 PM.png" width="400px" height="200px">
 </div>
 
-==Figure 1== is a high level overview of the tables. These tables would have a **one to one relationship**, where the `points_id` column in the User table serves as a foreign key referencing the Primary key (`id`) in the Reward_Points table. This ensures that whenever the user's points are needed to be displayed in his own account, it would only take **O(1)** time.
+==Figure 1== is a high-level overview of the tables. These tables would have a **one to one relationship**, where the `points_id` column in the User table serves as a foreign key referencing the Primary key (`id`) in the Reward_Points table. This ensures that whenever the user's points need to be retrieved and displayed in their own account, it would only take **O(1)** time.
 
 ==Figure 2== 
 <div align="center">
 <img alt="center" src="Screenshot 2025-03-14 at 6.07.56 PM.png" width="400px" height="200px">
 </div>
 
-> [!Take note that in Figure 2, the key is used for indexing , while Index (e.g Index:15) points to the actual index in the database]
+> [!Take note that in Figure 2, the key is used for indexing, while Index (e.g Index:15) points to the actual index in the database]
 
 Searching for a person's username and id in the `users` table could result in $O(n)$ complexity if we use a trivial sequential search approach. To optimise lookups, the **User** table should implement database indexing. This allows the database to jump directly to the relevant sections instead of iterating through the data. As shown in ==Figure 2==, indexing uses a structure, similar to B-tree, which ensures **O(log n)** time complexity for searching.
 
 (maybe add actual example here)
 
-However, **Rewards point** table should not use database indexing. This is due to the frequent changing in the table (explained in [[2D report#User Ranking System]]). Although B-tree's are great for searching, they slow down when operations like insert, update and delete happens. This operations adds overhead, as for each operation, the database would have to keep rebuilding and reorganising the data structure and possibly rebalancing the trees, slowing down the performance.
+However, **Reward points** table should not use database indexing. This is due to the frequent updates and changes in the table (explained in [[2D report#User Ranking System]]). Although B-tree's are great for searching, they slow down when operations like insert, update and delete happen. These operations add overhead, as for each operation, the database would have to keep rebuilding and reorganising the data structure and possibly rebalancing the trees, slowing down the performance.
 
 (Should i explain b-tree oso??)
 
 ---
 # User Ranking System
 
-The ranking system is designed in a way to incentivise user engagement and reward top-performing users. There are 4 tiers in this system. Bronze, Silver, Gold and Platinum.  A user can gain points by getting likes and comments on their post and videos and would lose points by gaining dislikes and reports. Rank progression is determined by a weekly leaderboard, where high performing users, are promoted, and low performing users are demoted.
+The ranking system is designed in a way to incentivise user engagement and reward top-performing users. There are 4 tiers in this system (Bronze, Silver, Gold and Platinum). A user can gain points by gaining likes and comments on their posts and videos. They would lose points by receiving dislikes and reports. Rank progression is determined by a weekly leaderboard, where high performing users, are promoted, and low performing users are demoted. Weekly rankings are only based on points accumulated **only** in that week.
 
 ## Ranking Progression Rules
 - **Bronze to Silver**
-	- A user would be promoted to Silver upon obtaining 1000 points
-	- A user would not be able to demote from Bronze to Silver.
+	- Bronze tier users would be promoted to Silver upon obtaining 1000 points.
+	- Users would not be able to demote from Bronze to Silver.
 - **Silver to Gold**
-	- Users must be in the top 20% those who earned points during the week
-	- Weekly rankings are only based on points accumulated **only** in that week.
+	- Silver tier users in the top 20% of the weekly leaderboard would be promoted to Gold.
 - **Gold to Platinum**
-	- Top 10% of those in the **gold** tier weekly points would be promoted to Platinum
-
+	- Gold tier users in the top 10% of the weekly leaderboard would be promoted to Platinum.
+   
 #### Demotion Rules
-To ensure user retainment and competitive fairness, Gold and Platinum players have to maintain their rankings.
-- If a **gold** user is in the bottom 20% , the user would demoted to silver
-- If a **platinum** user is in the bottom 10% , the user would demoted to gold.
+To ensure user engagement and competitive fairness, Gold and Platinum players have to maintain their rankings.
+- If a **Gold** user is in the bottom 20%, the user will be demoted to Silver
+- If a **Platinum** user is in the bottom 10%, the user will be demoted to Gold.
 
-A **silver** user is not able to demote to bronze. This allows the user to have a sense of accomplishment reinforcing a positive user experience. Furthermore, by preventing the demotion to bronze, it ensures motivation for those users that had a temporary decline in activity.
+A **Silver** user is not able to be demoted to Bronze. This allows the user to have a sense of accomplishment reinforcing a positive user experience. Furthermore, by preventing the demotion to bronze, it ensures motivation for those users who had a temporary decline in activity for the week.
 
 # Algorithm for sorting points
 The algorithm used to store **Reward Points** table would be the **Red-Black Tree** algorithm. It is an modified version of the Binary Search Tree. It is also offers faster insertions and deletions than the AVL tree, due to the lesser amount of rotations when restructuring the tree.
@@ -102,9 +101,9 @@ The algorithm used to store **Reward Points** table would be the **Red-Black Tre
 </div>
 
 In a red-black tree:
-- A node is can only be black or red
-- The root and leaves are black
-- If a node is red, then the children are black
+- A node can only be black or red
+- The root and leaf nodes are black
+- If a node is red, then the children nodes are black
 - ALL paths from a node to its descendants should have the same number of black nodes
 
 ##### Node Class
@@ -140,7 +139,7 @@ The **RBT** class only contain one key element, `root` it represents the startin
 
 
 ### Sub-Operations
-Before we dive into the main operations for the rewards system, there are some fundamental sub-operations that would be used in the following main operations (insert, delete and update)
+Before we dive into the main operations for the rewards system, there are some fundamental sub-operations that would be used in the following main operations (insert, delete and update).
 ##### ROTATION  OPERATIONS
 ```
 FUNCTION ROTATE_LEFT(RBT,node):
@@ -192,9 +191,9 @@ FUNCTION ROTATE_RIGHT(node):
 	
 ```
 
-This are the 2 types of rotations.
-- The left rotation helps to balance right heavy tree by shifting the node down and bring the right child of the node up
-- The right rotation helps to balance left heavy trees by shifting the node down and bring the left child up of the node.
+These are the 2 types of rotations.
+- The left rotation helps to balance the right-heavy tree by shifting the node down and bringing the right child of the node up
+- The right rotation helps to balance the left-heavy trees by shifting the node down and bringing the left child of the node up.
 
 <div align="center">
     <img src="rotateleft.jpg" alt="Image 1" width="35%">
@@ -204,7 +203,7 @@ This are the 2 types of rotations.
 
 (Change the colour of the picture and make only A highlight red)
 
-Both ROTATE_LEFT and ROTATE_RIGHT are functions originally used in Binary Search Tree to help restructure the tree. They are used in RBT to not only help maintain the tree structure but helps to rebalance the colours to preserve RBT properties after some operations
+Both ROTATE_LEFT and ROTATE_RIGHT are functions originally used in the Binary Search Tree to help restructure the tree. They are used in RBT to not only help maintain the balanced tree structure but helps to update the colours to preserve RBT properties after some operations.
 ### Main Operations
 (Should i do the actual insert here? but there is no need for it cause when we insert new user, the points value would always be 0)
 ##### Insert operation
@@ -234,16 +233,16 @@ FUNCTION RB_INSERT(RBT,user_id)
 	smallest_node.left = node 
 	node.parent = smallest_node
 
-	//Ensure that the reb black property are maintained
+	//Ensure that the red-black property is maintained
 	FIX_INSERT(node)
 ```
 
-In this implementation, the insert operation is only used when a new user is created. Unlike a normal RBT where nodes are inserted based on their values, every **new** user starts with **0 points**. Thus, the placement in the tree follows a fixed pattern. The pseudocode reflects this by locating the minimum node (the node with the smallest `points`) and add the new user as a left child.When a new node is added into the BST, this may violate the RBT properties. To fix the tree, a corrective operation called `FIX_INSERT` is applied.
+In this implementation, the insert operation is only used when a new user is created. Unlike a normal RBT where nodes are inserted based on their values, every **new** user starts with **0 points**. Thus, the placement in the tree follows a fixed pattern. The pseudocode reflects this by locating the minimum node (the node with the smallest `points`) and adding the new user as a left child. When a new node is added to the BST, this may violate the RBT properties. To fix the tree, a corrective operation called `FIX_INSERT` is applied.
 
 ##### Fix Insert Operation
 ```
 FUNCTION FIX_INSERT(node):
-	// if both parent and node are red, it voliates the 3rd rule
+	// if both parent and node are red, it violates the 3rd rule
 	WHILE node.parent.color == "red" do 
 		// check if the parent node is left child
 		IF node.parent == node.parent.parent.left do
@@ -298,14 +297,14 @@ FUNCTION FIX_INSERT(node):
 	self.root.color <- "black"
 ```
 
-When inserting a new node, there are 3 cases that may happen that violates the RBT properties
+When inserting a new node, there are 3 cases that could happen that violate the RBT properties:
 - **Case 1:** When the uncle node is red
-	- Set both the uncle and parent node colors to black, grandparents to red then move up the tree to check for any further violations in the Tree 
+	- Set both the uncle and parent node colors to black, and grandparents to red then move up the tree to check for any further violations in the Tree 
 - **Case 2:** When the uncle node is black and the node is a right child
 	- Call a left rotation on the parent 
 - **Case 3:** When the uncle node is black and the node is a left child 
 	- Set the parent color to black and the grandparent color to red, then perform a left rotate on the the grandparent
-So the pseudocode above checks if there is any **Red-Red violation** with the node and the parent node, then checks if the parent node is a left or right node as this affects the uncles position.Then it handles any of the 3 cases. If needed, the tree would move up until the RBT properties are restored.
+So the pseudocode above checks if there is any **Red-Red violation** with the node and the parent node, then checks if the parent node is a left or right node as this affects the uncle's position. Then it handles any of the 3 cases. If needed, the tree will continue to adjust upwards until the Red-Black Tree properties are fully restored.
 
 
 
