@@ -94,31 +94,38 @@ To ensure user retainment and competitive fairness, Gold and Platinum players ha
 
 A **silver** user is not able to demote to bronze. This allows the user to have a sense of accomplishment reinforcing a positive user experience. Furthermore, by preventing the demotion to bronze, it ensures motivation for those users that had a temporary decline in activity.
 
-# Algorithm for sorting points
+# Algorithms
+The data structure used to store the **User** table would be a HashMap.  HashMap offers average-case O(1) time complexity for insertion, deletion and lookups ,making it much faster than most algorithms. While HashMap has a worst-case time complexity of O(n) due to collisions (adding all into one key) , this can be negated by choosing an effective hash function and maintaining a low load factor. %% and maybe bronze and silver tiers  %% 
+
+```
+Class HashMap():
+	Table <- An array of list // Create default hash map
+	size <- 0                     //default size
+```
+
 The algorithm used to store **Reward Points** table would be the **Red-Black Tree** algorithm. It is an modified version of the Binary Search Tree. It is also offers faster insertions and deletions than the AVL tree, due to the lesser amount of rotations when restructuring the tree.
+
+
 
 <div align="center">
 <img alt="center" src="telegram-cloud-photo-size-5-6246945506316107709-y.jpg" width="420px" height="300px">
 </div>
 
 In a red-black tree:
-- A node is can only be black or red
-- The root and leaves are black
-- If a node is red, then the children are black
-- ALL paths from a node to its descendants should have the same number of black nodes
+1. A node is can only be black or red
+2. The root and leaves are black
+3. If a node is red, then the children are black
+4. ALL paths from a node to its descendants should have the same number of black nodes
 
 ##### Node Class
-```pseudo
-	If function does not exist do
-		x  = x + 1
-	
-```
+
 ```
 Class Node(user_id):
 	Requires: a new user id from the User table
 	
-	String color  <- "red"       // Default color of new nodes are red
+	String color  <- "red"      // Default color of new nodes are red
 	integer points <- 0         // Default membership points
+	integer updated_points <-0  // amount of points gained in that week
 	String tier <- "Bronze"     // Default membership tier
 	Node left <- NIL
 	Node right <- NIL
@@ -137,11 +144,9 @@ Class RedBlackTree:
 
 The **RBT** class only contain one key element, `root` it represents the starting of point of the tree. When the tree is empty, root is NIL as there are no nodes yet. All main operations such as insert, delete and update starts from this `root` node.
 
-
-
 ### Sub-Operations
 Before we dive into the main operations for the rewards system, there are some fundamental sub-operations that would be used in the following main operations (insert, delete and update)
-##### ROTATION  OPERATIONS
+##### Rotation operations
 ```
 FUNCTION ROTATE_LEFT(RBT,node):
 	Require: RedBlackTree class that has nodes as elements
@@ -205,12 +210,47 @@ This are the 2 types of rotations.
 (Change the colour of the picture and make only A highlight red)
 
 Both ROTATE_LEFT and ROTATE_RIGHT are functions originally used in Binary Search Tree to help restructure the tree. They are used in RBT to not only help maintain the tree structure but helps to rebalance the colours to preserve RBT properties after some operations
+
+##### Move Tree operations
+```
+FUNCTION MOVETREE(RBT,replacednode,node)
+	Require: RedBlackTree class that has nodes as elements
+	Require: a node that is to be removed from the RBT 
+	Require: node to replaced at the replaced node
+	
+	if deletenode.parent == NIL do 
+		RBT.root <- node
+	elif deletenode == deletenode.parent.left:
+		deletenode.parent.left. <- node 
+	else:
+		delelenode.parent.right <- node
+	node.parent <- deletenode.parent
+```
+
+The move tree operation  replaces the subtree of `replace` with the subtree of `node`. Which adjusts the parent-child relationship of the node accordingly.
+
+(add more explaination and examples)
+
+##### In-order Traversal Operation
+```
+FUNCTION INORDERTRAVERSAL(node,nodelist):
+	Requires: an interger value
+	Requires: nodelist which is an array of nodes
+	
+	IF node == NIL do
+		return nodelist
+	return INORDERTRAVERSAL(node.left,nodelist)
+	nodelist <- nodelist + node
+	return INORDERTRAVERSAL(node.right,nodelist)
+	
+```
+(Explanation)
 ### Main Operations
 (Should i do the actual insert here? but there is no need for it cause when we insert new user, the points value would always be 0)
-##### Insert operation
+##### Insert operations
 ```
-FUNCTION RB_INSERT(RBT,user_id)
-	Require: RedBlackTree class that has nodes as elements
+FUNCTION INSERT_NEWUSER(RBT,user_id)
+	Require: RedBlackTree(RBT) that has nodes as elements
 	Require: User_id from the User table
 
 	node <- NEW Node(user_id)
@@ -235,14 +275,17 @@ FUNCTION RB_INSERT(RBT,user_id)
 	node.parent = smallest_node
 
 	//Ensure that the reb black property are maintained
-	FIX_INSERT(node)
+	FIX_INSERT(RBT,node)
 ```
 
 In this implementation, the insert operation is only used when a new user is created. Unlike a normal RBT where nodes are inserted based on their values, every **new** user starts with **0 points**. Thus, the placement in the tree follows a fixed pattern. The pseudocode reflects this by locating the minimum node (the node with the smallest `points`) and add the new user as a left child.When a new node is added into the BST, this may violate the RBT properties. To fix the tree, a corrective operation called `FIX_INSERT` is applied.
 
 ##### Fix Insert Operation
 ```
-FUNCTION FIX_INSERT(node):
+FUNCTION FIX_INSERT(RBT,node):
+	Require: RedBlackTree(RBT) that has nodes as elements
+	Require: Node that was inserted into RBT
+	
 	// if both parent and node are red, it voliates the 3rd rule
 	WHILE node.parent.color == "red" do 
 		// check if the parent node is left child
@@ -260,7 +303,7 @@ FUNCTION FIX_INSERT(node):
 			//**** CASE 2 ****
 			ELSE IF node == node.parent.right do
 				node <- node.parent
-				LEFT_ROTATE(node) 
+				LEFT_ROTATE(RBT,node) 
 				
 			//**** CASE 3 ****
 			ELSE do
@@ -268,8 +311,7 @@ FUNCTION FIX_INSERT(node):
 				node.parent.parent.color = "red"
 				RIGHT_ROTATE(node.parent.parent)
 				
-		// check if parent node is right child
-		//Repeat the same process, just now on the right side
+		//MIRROR (uncle is the left child of grandpa)
 		ELSE do
 			//uncle node
 			leftgrandpa <- node.parent.parent.left 
@@ -284,13 +326,13 @@ FUNCTION FIX_INSERT(node):
 			//**** CASE 2 ****
 			ELIF node == node.parent.left do 
 				 node <- node.parent
-				 RIGHT_ROTATE(node)
+				 RIGHT_ROTATE(RBT,node)
 				 
 			//**** CASE 3 ****
 			ELSE do
-				node.parent.color <- "Black"
-				node.parent.parent.color <- "Red"
-				LEFT_ROTATE(node.parent.parent)
+				node.parent.color <- "black"
+				node.parent.parent.color <- "red"
+				LEFT_ROTATE(RBT,node.parent.parent)
 			
 		if node == RBT.root:
 			break
@@ -300,14 +342,158 @@ FUNCTION FIX_INSERT(node):
 
 When inserting a new node, there are 3 cases that may happen that violates the RBT properties
 - **Case 1:** When the uncle node is red
-	- Set both the uncle and parent node colors to black, grandparents to red then move up the tree to check for any further violations in the Tree 
+	 Set both the uncle and parent node colours to black, grandparents to red then move up the tree to check for any further violations in the Tree 
 - **Case 2:** When the uncle node is black and the node is a right child
-	- Call a left rotation on the parent 
+	 Call a left rotation on the parent 
 - **Case 3:** When the uncle node is black and the node is a left child 
-	- Set the parent color to black and the grandparent color to red, then perform a left rotate on the the grandparent
-So the pseudocode above checks if there is any **Red-Red violation** with the node and the parent node, then checks if the parent node is a left or right node as this affects the uncles position.Then it handles any of the 3 cases. If needed, the tree would move up until the RBT properties are restored.
+	 Set the parent colour to black and the grandparent colour to red, then perform a left rotate on the the grandparent
+So the pseudocode above checks if there is any **Red-Red violation** with the node and the parent node, then checks if the parent node is a left or right node as this affects the uncles position. Then it handles any of the 3 cases. If needed, the tree would move up until the RBT properties are restored.
+
+(Add why this is log n)
+##### Delete Operation
+```
+FUNCTION DELETE_USER(RBT,node):
+	Require: a node from user table to be deleted
+
+	orginalcolor <- node.color 
+	//**** CASE 1 ****
+	IF node.left == NIL do 
+		fix_node <- right 
+		MOVETREE(RBT,node,node.right)
+	
+	//**** CASE 2 ****
+	ELSE IF node.right == NIL do
+		fix_node <- node.left
+		MOVETREE(RBT,node,node.left)
+
+	//**** CASE 3 ****
+	ELSE do 
+		// Find smallest node bigger than node
+		minimum <- node.right
+		WHILE minimum.left != NIL do
+			minimum <- minimum.left 
+		orginalColor <- minimum.color 
+		temp <- minimum.right
+		
+		IF minimum.parent == node do 
+				temp.parent <- minimum 
+		ELSE do 
+			MOVETREE(RBT,minimum, minimum.right)
+			minimum.right <- node.right 
+			minimum.right.parent <- minimum 
+
+		MOVETREE(node,minimum)
+		minimum.left <- node.left
+		minimum.left.parent <- minimum 
+		minimum.color <- node.color
+
+	if orginalColor == "black":
+		FIX_DELETE(RBT,temp)
+```
+
+The delete operation removes a `node` from a Red-Black Tree while ensuring that the tree maintains its balance and Red-Black properties after the deletion. The method works by considering the different cases:
+- **Case 1**: Node has no left child
+		When the node has only one child, the node can be simply replaced with the right child to maintain the tree structure.
+- **Case 2**: Node has no right child
+		Similarly to case 1, the node is replaced by the single left child 
+- **Case 3**: Node has both children
+		If the node has both children, the node would be replaced by the successor(smallest node bigger than node). It starts by looking at the right child, and the `while` loop finds the smallest node in the right subtree.
+		Then, we handle the case where the `minimum node` parent is the `node` to be deleted. Since the `minimum node` is the right child of the `node `that is needed to be deleted,  we would not need to adjust the parent of the right child. 
+		If the `minimum node` parent is not the node to be deleted, we swap the `minimum node` with the `node` to be deleted. 
+Lastly, if the colour of the deleted `node` is black, we would have fix the tree using `DELETE_FIX` to maintain the red-black properties. ~~This is because removing a black node can violate the 4th rule of RBT , which states that every path from the root to the leaf should contain the same number of black nodes. Hence, to restore balance, a correction is need.~~
+
+The delete operation is used in two scenarios:
+1. Account Deletion:
+		When a user deletes their account, the data would be removed from the database and the corresponding node must be removed from **RBT**
+2.  Points Update:
+		When a user gain or loses points, their position in the RBT may change. To maintain the tree structure, the existing node is removed and a new node with the updated points is inserted
+
+##### Fix Delete Operation
+```
+FUNCTION FIX_DELETE(RBT,node):
+	Require: node that replaced the deleted node
+
+	WHILE NODE != RBT.root and node.color == "black"
+		// check if node is left child 
+		IF node == node.parent.left
+			sibling <- node.parent.right
+			
+			//**** CASE 1 ****
+			IF sibling.color == "red" do
+				sibling.color <- "black"
+				node.parent.color <- "red"
+				LEFT_ROTATE(node.parent)
+				sibling <- node.parent.right
+
+			//**** CASE 2 ****
+			IF sibling.left.color == "black" and sibling.right.color == "black" do
+				sibling.color <- "red"
+				node <- node.parent
+				
+			//**** CASE 3 ****
+			ELSE do
+				//**** CASE 3a ****
+				IF sibling.right.color == "black"
+					sibling.left.color <- "black"
+					sibling.color <- "red"
+					RIGHT_ROTATE(sibling)
+					sibling <- node.parent.right 
+
+				sibling.color <- node.parent.color
+				node.parent.color <- "black"
+				sibling.right.color <- "black"
+				LEFT_ROTATE(node.parent)
+				node <- RBT.root
+				
+		//MIRROR (if node is right child)
+		ELSE:
+			sibling <- node.parent.left 
+			IF sibling.color <- "red"
+				sibling.color <- "black"
+				node.parent.color <- "red"
+				RIGHT_ROTATE(node.parent)
+				sibling <- node.parent.left
+
+			IF sibling.right.color == "black" and sibling.right.color == "black" do
+				sibling.color <- "red"
+				node <- node.parent
+
+			ELSE:
+				IF sibling.left.color == "black"
+					sibling.right.color <- "black"
+					sibling.color <- "red"
+					LEFT_ROTATE(sibling)
+					sibling <-node.parent.left
+				sibling.color <- node.parent.color 
+				node.parent.color <- "black"
+				sibling.left.color <- "black"
+				RIGHT_ROTATE(node.parent)
+				node <- RBT.root
+		
+	node.color <- 0								
+```
+
+The `FIX_DELETE` function restores RBT properties after deleting a node, specifically when the node deleted was black. This is necessary as removing a black node would violate the 4th rule of the RBT , which states that every path from the root to the leaf should contain the same number of black nodes. Hence, to restore balance, a correction is need. This is done by correcting this 3 cases:
+- **Case 1** :  Sibling of `node` is red
+		If `sibling` is red , we rotate left around the parent of `node` to move the `sibling` upwards
+- **Case 2:** Both children of `sibling` are black
+		If both children of sibling are black, we recolour `sibling` to red and move problem up to the parent node (to be re-iterated again)]
+- **Case 3:**
+	- **Case 3a**: Sibling right child is black, but left child is red
+			To prepare for the next step(balancing the tree ), perform `RIGHT ROTATION` on `sibling` to bring the red node higher. 
+		Since both child of `sibling` is red, we recolour the nodes and perform `LEFT_ROTATION` 
+Finally we check that the `node` colour remains black, preserving the RBT properties.
+
+##### Update operation
+```
+FUNCTION UPDATE_RANKINGS(RBT)
+	
+	INORDERTRAVERSAL(node)
+```
+The update operation would only be used at the end of the week, where the points would be needed to be tallied to determine which user would qualify for a promotion and demotion.
 
 
+%% What i think need to be done would be to segment the tiers into different RBT(eg RBT_brozne and Silver , RBT gold and RBT plat...  but wait then in this case is there a point in doing RBT_bronze and silver?) %%
 
 **References**
 Figure 1: Using https://dbdiagram.io/home to create my own db diagram
