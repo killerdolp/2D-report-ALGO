@@ -94,11 +94,11 @@ To ensure user engagement and competitive fairness, Gold and Platinum players ha
 A **Silver** user is not able to be demoted to Bronze. This allows the user to have a sense of accomplishment reinforcing a positive user experience. Furthermore, by preventing the demotion to bronze, it ensures motivation for those users who had a temporary decline in activity for the week.
 
 # Algorithms
-The data structure used to store the **User** table would be a HashMap.  HashMap offers average-case O(1) time complexity for insertion, deletion and lookups ,making it much faster than most algorithms. While HashMap has a worst-case time complexity of O(n) due to collisions (adding all into one key) , this can be negated by choosing an effective hash function and maintaining a low load factor. %% and maybe bronze and silver tiers  %% 
+The data structure used to store the **User** table would be a HashMap.  HashMap offers average-case O(1) time complexity for insertion, deletion and lookups ,making it much faster than most algorithms. While HashMap has a worst-case time complexity of O(n) due to collisions (adding all into one key) , this can be negated by choosing an effective hash function and maintaining a low load factor. %% and maybe bronze tiers  %% 
 
 ```
 Class HashMap():
-	Table <- An array of list // Create default hash map
+	Table <- An array of list     // Create default hash map
 	size <- 0                     //default size
 ```
 
@@ -117,11 +117,6 @@ In a red-black tree:
 - ALL paths from a node to its descendants should have the same number of black nodes
 
 ##### Node Class
-```pseudo
-	If function does not exist do
-		x  = x + 1
-	
-```
 ```
 Class Node(user_id):
 	Requires: a new user id from the User table
@@ -500,7 +495,7 @@ There are 2 update operations for different cases:
 
 ```
 FUNCTION UPDATE_RANKINGS(RBT)
-	Require: RedBlackTree class of gold or platinum members that has nodes as elements
+	Require: RedBlackTree class of silver ,gold or platinum members that has nodes as elements
 	nodelist <- INORDERTRAVERSAL(node)
 
 	FOR node in nodelist do
@@ -514,15 +509,24 @@ FUNCTION UPDATE_RANKINGS(RBT)
 ```
 The `UPDATE_RANKING` operation would only be used at the end of the week, where the points would be needed to be tallied to determine which user would qualify for a promotion and demotion. The `UPDATE_RANKINGS` works by traversing the tree to get all nodes, and for each node, if the value does not equal to the `weekly_points` , we remove the node and add all important values to the new node with the value of `weekly_points`
 
-The second update operation is used for tiers of bronze and silver, where the points not in a red-black tree but an HashMap. This operation happens every time the user gains or lose points.
+The second update operation is used for tiers of bronze, where the points not in a red-black tree but directly taken form the `User` table HashMap. This operation happens every time the user gains or lose points.
 ```
 FUNCTION UPDATE_POINTS(node,value)
 		Require: node from a user_table
-		node.points <- node.points + value
+		Require: an integer value
 		
+		node.points <- node.points + value
+		//Update tier to silver
+		IF node.points > 100 and node.tier == "bronze":
+			node.tier <- "silver"
+			RB_INSERT(RBT_silver,node.userid)
+			return "You have reached silver!!"
 ```
 
-The 
+Since the bronzer tier does not require sorting, we can store the bronze users in a HashMap instead. Once a user reaches 100 points, the user's `node` is inserted into the Silver RBT. 
+
+
+
 whenever user gains likes check which tier, if gold and plat tier , node.update_points += 1 , dislikes , nodes.update_points -=1. 
 
 %% What i think need to be done would be to segment the tiers into different RBT(eg RBT_brozne and Silver , RBT gold and RBT plat...  but wait then in this case is there a point in doing RBT_bronze and silver?) %%
