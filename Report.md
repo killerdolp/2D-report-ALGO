@@ -1,4 +1,4 @@
-
+``
 ---
 # Title page
 
@@ -94,44 +94,36 @@ To ensure user engagement and competitive fairness, Gold and Platinum players ha
 A **Silver** user is not able to be demoted to Bronze. This allows the user to have a sense of accomplishment reinforcing a positive user experience. Furthermore, by preventing the demotion to bronze, it ensures motivation for those users who had a temporary decline in activity for the week.
 
 # Algorithms
-The data structure used to store the **User** table would be a HashMap.  HashMap offers average-case O(1) time complexity for insertion, deletion and lookups ,making it much faster than most algorithms. While HashMap has a worst-case time complexity of O(n) due to collisions (adding all into one key) , this can be negated by choosing an effective hash function and maintaining a low load factor. %% and maybe bronze and silver tiers  %% 
+The data structure used to store the **User** table would be a HashMap.  HashMap offers average-case O(1) time complexity for insertion, deletion and lookups ,making it much faster than most algorithms. While HashMap has a worst-case time complexity of O(n) due to collisions (adding all into one key) , this can be negated by choosing an effective hash function and maintaining a low load factor. %% and maybe bronze tiers  %% 
 
 ```
 Class HashMap():
-	Table <- An array of list // Create default hash map
+	Table <- An array of list     // Create default hash map
 	size <- 0                     //default size
 ```
 
+(continue here) 
+
 The algorithm used to store **Reward Points** table would be the **Red-Black Tree** algorithm. It is an modified version of the Binary Search Tree. It is also offers faster insertions and deletions than the AVL tree, due to the lesser amount of rotations when restructuring the tree.
-
-
 
 <div align="center">
 <img alt="center" src="telegram-cloud-photo-size-5-6246945506316107709-y.jpg" width="420px" height="300px">
 </div>
 
 In a red-black tree:
-<<<<<<< HEAD
-1. A node is can only be black or red
-2. The root and leaves are black
-3. If a node is red, then the children are black
-4. ALL paths from a node to its descendants should have the same number of black nodes
-=======
 - A node can only be black or red
 - The root and leaf nodes are black
 - If a node is red, then the children nodes are black
 - ALL paths from a node to its descendants should have the same number of black nodes
->>>>>>> origin/main
 
 ##### Node Class
-
 ```
 Class Node(user_id):
 	Requires: a new user id from the User table
 	
-	String color  <- "red"      // Default color of new nodes are red
+	String color  <- "red"       // Default color of new nodes are red
 	integer points <- 0         // Default membership points
-	integer updated_points <-0  // amount of points gained in that week
+	integer weekly_points <-0  // amount of points gained in that week
 	String tier <- "Bronze"     // Default membership tier
 	Node left <- NIL
 	Node right <- NIL
@@ -139,25 +131,24 @@ Class Node(user_id):
 	integer userid <- user_id
 ```
 
-The **Node** class contains several key elements essential for maintaining the Reward points table structure and functionality of a **RBT**. The `color` attribute ensures the tree remains balanced according to Red-Black Tree properties. The `points` attribute stores the user’s reward points, while `tier` represents the user's membership ranking. The `left`, `right`, and `parent` attributes establish links between nodes. Finally, `user_id` uniquely identifies each node, associating it with a specific user.
+The **Node** class contains several key attributes essential for maintaining the Reward points table structure and functionality of a **RBT**. The `color` attribute ensures the tree remains balanced according to Red-Black Tree properties. The `points` attribute stores the user’s reward points, while `tier` represents the user's membership ranking. The `left`, `right`, and `parent` attributes establish links between nodes. Finally, `user_id` uniquely identifies each node, associating it with a specific user.
 
 ##### Red black Tree Class
 
 ```
 Class RedBlackTree:
 	Node root <- NIL   //Default empty Tree
+	Integer size <- 0  // Integer Size
 ```
 
-The **RBT** class only contain one key element, `root` it represents the starting of point of the tree. When the tree is empty, root is NIL as there are no nodes yet. All main operations such as insert, delete and update starts from this `root` node.
+The **RBT** class only contain 2 key attributes, 
+The Node `root`  represents the starting of point of the tree. When the tree is empty, root is NIL as there are no nodes yet. All main operations such as insert, delete and update starts from this `root` node.
+The integer `size` use to retrieve the top people in the scoreboard efficiently
+
 
 ### Sub-Operations
-<<<<<<< HEAD
-Before we dive into the main operations for the rewards system, there are some fundamental sub-operations that would be used in the following main operations (insert, delete and update)
-##### Rotation operations
-=======
 Before we dive into the main operations for the rewards system, there are some fundamental sub-operations that would be used in the following main operations (insert, delete and update).
 ##### ROTATION  OPERATIONS
->>>>>>> origin/main
 ```
 FUNCTION ROTATE_LEFT(RBT,node):
 	Require: RedBlackTree class that has nodes as elements
@@ -220,8 +211,7 @@ These are the 2 types of rotations.
 
 (Change the colour of the picture and make only A highlight red)
 
-<<<<<<< HEAD
-Both ROTATE_LEFT and ROTATE_RIGHT are functions originally used in Binary Search Tree to help restructure the tree. They are used in RBT to not only help maintain the tree structure but helps to rebalance the colours to preserve RBT properties after some operations
+Both ROTATE_LEFT and ROTATE_RIGHT are functions originally used in the Binary Search Tree to help restructure the tree. They are used in RBT to not only help maintain the balanced tree structure but helps to update the colours to preserve RBT properties after some operations.
 
 ##### Move Tree operations
 ```
@@ -257,15 +247,13 @@ FUNCTION INORDERTRAVERSAL(node,nodelist):
 	
 ```
 (Explanation)
-=======
-Both ROTATE_LEFT and ROTATE_RIGHT are functions originally used in the Binary Search Tree to help restructure the tree. They are used in RBT to not only help maintain the balanced tree structure but helps to update the colours to preserve RBT properties after some operations.
->>>>>>> origin/main
+
 ### Main Operations
 (Should i do the actual insert here? but there is no need for it cause when we insert new user, the points value would always be 0)
-##### Insert operations
+##### Insert operation
 ```
-FUNCTION INSERT_NEWUSER(RBT,user_id)
-	Require: RedBlackTree(RBT) that has nodes as elements
+FUNCTION RB_INSERT(RBT,user_id)
+	Require: RedBlackTree class that has nodes as elements
 	Require: User_id from the User table
 
 	node <- NEW Node(user_id)
@@ -289,29 +277,17 @@ FUNCTION INSERT_NEWUSER(RBT,user_id)
 	smallest_node.left = node 
 	node.parent = smallest_node
 
-<<<<<<< HEAD
-	//Ensure that the reb black property are maintained
-	FIX_INSERT(RBT,node)
-=======
 	//Ensure that the red-black property is maintained
+	RBT.size <- RBT.size + 1
 	FIX_INSERT(node)
->>>>>>> origin/main
 ```
 
 In this implementation, the insert operation is only used when a new user is created. Unlike a normal RBT where nodes are inserted based on their values, every **new** user starts with **0 points**. Thus, the placement in the tree follows a fixed pattern. The pseudocode reflects this by locating the minimum node (the node with the smallest `points`) and adding the new user as a left child. When a new node is added to the BST, this may violate the RBT properties. To fix the tree, a corrective operation called `FIX_INSERT` is applied.
 
 ##### Fix Insert Operation
 ```
-<<<<<<< HEAD
-FUNCTION FIX_INSERT(RBT,node):
-	Require: RedBlackTree(RBT) that has nodes as elements
-	Require: Node that was inserted into RBT
-	
-	// if both parent and node are red, it voliates the 3rd rule
-=======
 FUNCTION FIX_INSERT(node):
 	// if both parent and node are red, it violates the 3rd rule
->>>>>>> origin/main
 	WHILE node.parent.color == "red" do 
 		// check if the parent node is left child
 		IF node.parent == node.parent.parent.left do
@@ -328,7 +304,7 @@ FUNCTION FIX_INSERT(node):
 			//**** CASE 2 ****
 			ELSE IF node == node.parent.right do
 				node <- node.parent
-				LEFT_ROTATE(RBT,node) 
+				LEFT_ROTATE(node) 
 				
 			//**** CASE 3 ****
 			ELSE do
@@ -336,7 +312,8 @@ FUNCTION FIX_INSERT(node):
 				node.parent.parent.color = "red"
 				RIGHT_ROTATE(node.parent.parent)
 				
-		//MIRROR (uncle is the left child of grandpa)
+		// check if parent node is right child
+		//Repeat the same process, just now on the right side
 		ELSE do
 			//uncle node
 			leftgrandpa <- node.parent.parent.left 
@@ -351,38 +328,34 @@ FUNCTION FIX_INSERT(node):
 			//**** CASE 2 ****
 			ELIF node == node.parent.left do 
 				 node <- node.parent
-				 RIGHT_ROTATE(RBT,node)
+				 RIGHT_ROTATE(node)
 				 
 			//**** CASE 3 ****
 			ELSE do
-				node.parent.color <- "black"
-				node.parent.parent.color <- "red"
-				LEFT_ROTATE(RBT,node.parent.parent)
+				node.parent.color <- "Black"
+				node.parent.parent.color <- "Red"
+				LEFT_ROTATE(node.parent.parent)
 			
 		if node == RBT.root:
 			break
-			
+	
 	self.root.color <- "black"
 ```
 
 When inserting a new node, there are 3 cases that could happen that violate the RBT properties:
 - **Case 1:** When the uncle node is red
-<<<<<<< HEAD
-	 Set both the uncle and parent node colours to black, grandparents to red then move up the tree to check for any further violations in the Tree 
-=======
 	- Set both the uncle and parent node colors to black, and grandparents to red then move up the tree to check for any further violations in the Tree 
->>>>>>> origin/main
 - **Case 2:** When the uncle node is black and the node is a right child
-	 Call a left rotation on the parent 
+	- Call a left rotation on the parent 
 - **Case 3:** When the uncle node is black and the node is a left child 
-<<<<<<< HEAD
-	 Set the parent colour to black and the grandparent colour to red, then perform a left rotate on the the grandparent
-So the pseudocode above checks if there is any **Red-Red violation** with the node and the parent node, then checks if the parent node is a left or right node as this affects the uncles position. Then it handles any of the 3 cases. If needed, the tree would move up until the RBT properties are restored.
+	- Set the parent color to black and the grandparent color to red, then perform a left rotate on the the grandparent
+So the pseudocode above checks if there is any **Red-Red violation** with the node and the parent node, then checks if the parent node is a left or right node as this affects the uncle's position. Then it handles any of the 3 cases. If needed, the tree will continue to adjust upwards until the Red-Black Tree properties are fully restored.
 
 (Add why this is log n)
 ##### Delete Operation
 ```
 FUNCTION DELETE_USER(RBT,node):
+	Require: RedBlackTree class that has nodes as elements
 	Require: a node from user table to be deleted
 
 	orginalcolor <- node.color 
@@ -417,6 +390,8 @@ FUNCTION DELETE_USER(RBT,node):
 		minimum.left.parent <- minimum 
 		minimum.color <- node.color
 
+	RBT.size <- RBT.size - 1
+
 	if orginalColor == "black":
 		FIX_DELETE(RBT,temp)
 ```
@@ -441,6 +416,7 @@ The delete operation is used in two scenarios:
 ##### Fix Delete Operation
 ```
 FUNCTION FIX_DELETE(RBT,node):
+	Require: RedBlackTree class that has nodes as elements
 	Require: node that replaced the deleted node
 
 	WHILE NODE != RBT.root and node.color == "black"
@@ -515,23 +491,49 @@ The `FIX_DELETE` function restores RBT properties after deleting a node, specifi
 Finally we check that the `node` colour remains black, preserving the RBT properties.
 
 ##### Update operation
+There are 2 update operations for different cases:
+
 ```
 FUNCTION UPDATE_RANKINGS(RBT)
-	
-	INORDERTRAVERSAL(node)
-```
-The update operation would only be used at the end of the week, where the points would be needed to be tallied to determine which user would qualify for a promotion and demotion.
-=======
-	- Set the parent color to black and the grandparent color to red, then perform a left rotate on the the grandparent
-So the pseudocode above checks if there is any **Red-Red violation** with the node and the parent node, then checks if the parent node is a left or right node as this affects the uncle's position. Then it handles any of the 3 cases. If needed, the tree will continue to adjust upwards until the Red-Black Tree properties are fully restored.
->>>>>>> origin/main
+	Require: RedBlackTree class of silver ,gold or platinum members that has nodes as elements
+	nodelist <- INORDERTRAVERSAL(node)
 
+	FOR node in nodelist do
+		IF node.points  != node.weekly_points do 
+			updatednode <- new Node(node.weekly_points)
+			updatenode.userid <- node.userid 
+			updatenode.tier <- node.tier
+			INSERT(updatenode)
+			DETELE(node)
+	
+```
+The `UPDATE_RANKING` operation would only be used at the end of the week, where the points would be needed to be tallied to determine which user would qualify for a promotion and demotion. The `UPDATE_RANKINGS` works by traversing the tree to get all nodes, and for each node, if the value does not equal to the `weekly_points` , we remove the node and add all important values to the new node with the value of `weekly_points`
+
+The second update operation is used for tiers of bronze, where the points not in a red-black tree but directly taken form the `User` table HashMap. This operation happens every time the user gains or lose points.
+```
+FUNCTION UPDATE_POINTS(node,value)
+		Require: node from a user_table
+		Require: an integer value
+		
+		node.points <- node.points + value
+		//Update tier to silver
+		IF node.points > 100 and node.tier == "bronze":
+			node.tier <- "silver"
+			RB_INSERT(RBT_silver,node.userid)
+			return "You have reached silver!!"
+```
+
+Since the bronzer tier does not require sorting, we can store the bronze users in a HashMap instead. Once a user reaches 100 points, the user's `node` is inserted into the Silver RBT. 
+
+
+
+whenever user gains likes check which tier, if gold and plat tier , node.update_points += 1 , dislikes , nodes.update_points -=1. 
 
 %% What i think need to be done would be to segment the tiers into different RBT(eg RBT_brozne and Silver , RBT gold and RBT plat...  but wait then in this case is there a point in doing RBT_bronze and silver?) %%
+
 
 **References**
 Figure 1: Using https://dbdiagram.io/home to create my own db diagram
 Figure 2: https://builtin.com/data-science/b-tree-index
 Figure 3: https://www.geeksforgeeks.org/introduction-to-red-black-tree/
-
 
