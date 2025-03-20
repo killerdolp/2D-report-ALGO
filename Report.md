@@ -1,4 +1,4 @@
-
+``
 ---
 # Title page
 
@@ -128,7 +128,7 @@ Class Node(user_id):
 	
 	String color  <- "red"       // Default color of new nodes are red
 	integer points <- 0         // Default membership points
-	integer updated_points <-0  // amount of points gained in that week
+	integer weekly_points <-0  // amount of points gained in that week
 	String tier <- "Bronze"     // Default membership tier
 	Node left <- NIL
 	Node right <- NIL
@@ -136,17 +136,19 @@ Class Node(user_id):
 	integer userid <- user_id
 ```
 
-The **Node** class contains several key elements essential for maintaining the Reward points table structure and functionality of a **RBT**. The `color` attribute ensures the tree remains balanced according to Red-Black Tree properties. The `points` attribute stores the user’s reward points, while `tier` represents the user's membership ranking. The `left`, `right`, and `parent` attributes establish links between nodes. Finally, `user_id` uniquely identifies each node, associating it with a specific user.
+The **Node** class contains several key attributes essential for maintaining the Reward points table structure and functionality of a **RBT**. The `color` attribute ensures the tree remains balanced according to Red-Black Tree properties. The `points` attribute stores the user’s reward points, while `tier` represents the user's membership ranking. The `left`, `right`, and `parent` attributes establish links between nodes. Finally, `user_id` uniquely identifies each node, associating it with a specific user.
 
 ##### Red black Tree Class
 
 ```
 Class RedBlackTree:
 	Node root <- NIL   //Default empty Tree
+	Integer size <- 0  // Integer Size
 ```
 
-The **RBT** class only contain one key element, `root` it represents the starting of point of the tree. When the tree is empty, root is NIL as there are no nodes yet. All main operations such as insert, delete and update starts from this `root` node.
-
+The **RBT** class only contain 2 key attributes, 
+The Node `root`  represents the starting of point of the tree. When the tree is empty, root is NIL as there are no nodes yet. All main operations such as insert, delete and update starts from this `root` node.
+The integer `size` use to retrieve the top people in the scoreboard efficiently
 
 
 ### Sub-Operations
@@ -281,6 +283,7 @@ FUNCTION RB_INSERT(RBT,user_id)
 	node.parent = smallest_node
 
 	//Ensure that the red-black property is maintained
+	RBT.size <- RBT.size + 1
 	FIX_INSERT(node)
 ```
 
@@ -340,7 +343,7 @@ FUNCTION FIX_INSERT(node):
 			
 		if node == RBT.root:
 			break
-			
+	
 	self.root.color <- "black"
 ```
 
@@ -357,6 +360,7 @@ So the pseudocode above checks if there is any **Red-Red violation** with the no
 ##### Delete Operation
 ```
 FUNCTION DELETE_USER(RBT,node):
+	Require: RedBlackTree class that has nodes as elements
 	Require: a node from user table to be deleted
 
 	orginalcolor <- node.color 
@@ -391,6 +395,8 @@ FUNCTION DELETE_USER(RBT,node):
 		minimum.left.parent <- minimum 
 		minimum.color <- node.color
 
+	RBT.size <- RBT.size - 1
+
 	if orginalColor == "black":
 		FIX_DELETE(RBT,temp)
 ```
@@ -415,6 +421,7 @@ The delete operation is used in two scenarios:
 ##### Fix Delete Operation
 ```
 FUNCTION FIX_DELETE(RBT,node):
+	Require: RedBlackTree class that has nodes as elements
 	Require: node that replaced the deleted node
 
 	WHILE NODE != RBT.root and node.color == "black"
@@ -489,13 +496,34 @@ The `FIX_DELETE` function restores RBT properties after deleting a node, specifi
 Finally we check that the `node` colour remains black, preserving the RBT properties.
 
 ##### Update operation
+There are 2 update operations for different cases:
+
 ```
 FUNCTION UPDATE_RANKINGS(RBT)
-	
-	INORDERTRAVERSAL(node)
-```
-The update operation would only be used at the end of the week, where the points would be needed to be tallied to determine which user would qualify for a promotion and demotion.
+	Require: RedBlackTree class of gold or platinum members that has nodes as elements
+	nodelist <- INORDERTRAVERSAL(node)
 
+	FOR node in nodelist do
+		IF node.points  != node.weekly_points do 
+			updatednode <- new Node(node.weekly_points)
+			updatenode.userid <- node.userid 
+			updatenode.tier <- node.tier
+			INSERT(updatenode)
+			DETELE(node)
+	
+```
+The `UPDATE_RANKING` operation would only be used at the end of the week, where the points would be needed to be tallied to determine which user would qualify for a promotion and demotion. The `UPDATE_RANKINGS` works by traversing the tree to get all nodes, and for each node, if the value does not equal to the `weekly_points` , we remove the node and add all important values to the new node with the value of `weekly_points`
+
+The second update operation is used for tiers of bronze and silver, where the points not in a red-black tree but an HashMap. This operation happens every time the user gains or lose points.
+```
+FUNCTION UPDATE_POINTS(node,value)
+		Require: node from a user_table
+		node.points <- node.points + value
+		
+```
+
+The 
+whenever user gains likes check which tier, if gold and plat tier , node.update_points += 1 , dislikes , nodes.update_points -=1. 
 
 %% What i think need to be done would be to segment the tiers into different RBT(eg RBT_brozne and Silver , RBT gold and RBT plat...  but wait then in this case is there a point in doing RBT_bronze and silver?) %%
 
