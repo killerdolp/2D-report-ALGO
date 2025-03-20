@@ -111,18 +111,99 @@ Class Node(user_id):
 
 The **Node** class contains several key attributes essential for maintaining the Reward points table structure and functionality of a **RBT**. The `color` attribute ensures the tree remains balanced according to Red-Black Tree properties. The `points` attribute stores the user’s reward points, while `tier` represents the user's membership ranking. The `left`, `right`, and `parent` attributes establish links between nodes. Finally, `user_id` uniquely identifies each node, associating it with a specific user.
 
+
+```
+Class User:
+	integer userid     
+	Node node
+```
+
+> [!Other attributes, such as username and password exist in the user class, but they are not relevant to the data structure.]
+
+This are 2 main few attributes that are needed in the User class 
+- The `userid` to uniquely identify each user.
+- The `node` a custom class that stores user's points and tier (E.g node.points = 0 and node.tier ="bronze")
+
 ##### HashMap
-
-The data structure used to store the **User** table would be a HashMap.  HashMap offers average-case O(1) time complexity for insertion, deletion and lookups ,making it much faster than most algorithms. While HashMap has a worst-case time complexity of O(n) due to collisions (adding all into one key) , this can be negated by choosing an effective hash function and maintaining a low load factor. %% and maybe bronze tiers  %% 
-
+The data structure used to store the **User** table would be a HashMap.  HashMap offers average-case O(1) time complexity for insertion, deletion and lookups ,making it much faster than most algorithms. While HashMap has a worst-case time complexity of $O(n)$ due to collisions (adding all into one key) , this can be negated by choosing an effective hash function and maintaining a low load factor. 
 ```
 Class HashMap():
-	Table <- An array of list     // Create default hash map
-	size <- 0                     //default size
+	Table <- An array of lists     // Create default hash map
+	integer table_size <- 100      //default size
+	integer total_users <- 0
+	load_factor <- 0.75            //Load factor is used for resizing table 
 ```
 
-(continue here) 
+```
+FUNCTION HM_HASHING(userid)
+	Require: userid of the user
 
+	return user_id % table_size
+```
+The `HM_hashing` function is a sub function used in most HashMap functions. It takes in the `userid` of the user and returns a value index within the HashMap table.
+
+```
+FUNCTION HM_INSERTNEW(hashmap,user)
+	Require: hashmap containing user class
+	Require: User class containing userid and node
+
+	IF (Hashmap.total_users / Hashmap.table_size) > hashmap.load_factor do
+		HM_RESIZETABLE(Hashmap)
+	index <- HM_HASHING(user.userid)
+	table[index] <- table[index] + user  //insert user into table
+	
+```
+The `HM_INSERTNEW` function is used when a new user creates their account. The main information of the users is then inserted into the HashMap. It function works by checking if the table exceeds the threshold (load factor) and resizes the table using `HM_RESIZETABLE()` then it uses `HM_HASHING` to determine index to store the user at. Using the index, we add the user to the hash table.
+
+```
+FUNCTION HM_RESIZETABLE(hashmap)
+	Require: hashmap containing user class
+	
+	new_table_size <- table_size * 2 
+	newtable <-  An array of lists 
+
+	FOR each list in hashmap.table do
+		For each (index,user) in list do 
+			new_index = HM_HASHING(user.id)
+			newtable[index] <- newtable[index] + user
+
+	Hashmap.table <- newtable 
+	Hashmap.table_size <- new_table_size
+```
+When the the table exceed threshold ,`HM_RESIZETABLE` is used. This is to prevent excessive collisions and maintain efficiency , ensuring that the worse case $O(n)$ would never happen. This is done by getting all elements in HashMap ,  re-indexing the elements , and adding them to the new table.
+
+```
+FUNCTION HM_GETUSER(hashmap,useridkey)
+	Require: hashmap containing user class
+	Require: a userid of a User class 
+
+	index <- HM_HASHING(useridkey)
+	FOR user in hashmap.table[index]
+		IF user.userid == useridkey do
+			return user
+	return NIL
+```
+The function `HM_GETUSER`is the most commonly used function in this  data structure.  Since it contains the relevant user information, including the node which contains points and tier. Given its frequent usage, it is **crucial** that the operation for this maintains at least an average case of $O(1)$ time complexity by managing the load factor and choosing a good hash function.
+```
+FUNCTION HM_DELELEUSER(userid)
+	Require: userid of a user class
+	
+	index <- HM_HASHING(useridkey)
+	FOR user in hashmap.table[index]
+		IF user.userid == useridkey do
+			REMOVE user from hashmap.table[index]
+			
+			IF user.tier == "SILVER" do
+				DELETE_USER(RBT_silver,user.node)
+			ELSE IF user.tier == "GOLD" do
+				DELETE_USER(RBT_gold,user.node)
+			ELSE IF user.tier == "PLATINUM" do
+				DELETE_USER(RBT_plat,user.node)
+				
+			return "removed"
+	return NIL
+```
+The function `HM_DELETEUSER` removes a user from the **HashMap** and ensures that their corresponding **tiered data** is also deleted from the appropriate **Red-Black Tree (RBT)** based on their membership tier. The function `DETELE_USER` would be explain more later. [[Report#Delete Operation]]
 ##### Red black Tree Class
 
 The algorithm used to store **Reward Points** table would be the **Red-Black Tree** algorithm. It is an modified version of the Binary Search Tree. It is also offers faster insertions and deletions than the AVL tree, due to the lesser amount of rotations when restructuring the tree.
@@ -244,13 +325,59 @@ FUNCTION INORDERTRAVERSAL(node,nodelist):
 	
 	IF node == NIL do
 		return nodelist
-	return INORDERTRAVERSAL(node.left,nodelist)
+		
+	INORDERTRAVERSAL(node.left,nodelist)
 	nodelist <- nodelist + node
-	return INORDERTRAVERSAL(node.right,nodelist)
-	
+	INORDERTRAVERSAL(node.right,nodelist)
+	return nodelist
 ```
 (Explanation)
 
+```
+FUNCTION FIND_MAX(node):
+	Require: A node from RBT
+	
+	max_node <- node
+	WHILE node.right != NIL do
+		max_node <- node.right
+
+	return max_node
+```
+
+```
+FUNCTION FIND_MIN(node):
+	Require: A node from RBT
+	min_node <- node
+	WHILE node.left != NIL do
+		min_node <- node.left
+
+	return min_node
+```
+
+```
+FUNCTION FIND_SUCCESSOR(node):
+	Require: A node from RBT
+
+	IF node.right != NIL do 
+		return FIND_MIN(node.right)
+	successor <- node.parent
+	WHILE successor != NIL and node = sucessor.right
+		node <- successor
+		successor <- successor.parent
+		
+```
+
+```
+FUNCTION FIND_PREDECESSOR(node):
+	Require: A node from RBT
+	
+	IF node.left != NIL do 
+		return FIND_MAX(node.left)
+	successor <- node.parent
+	WHILE successor != NIL and node = sucessor.left
+		node <- successor
+		successor <- successor.parent
+```
 ### Main Operations
 (Should i do the actual insert here? but there is no need for it cause when we insert new user, the points value would always be 0)
 ##### Insert operation
@@ -290,6 +417,8 @@ In this implementation, the insert operation is only used when a new user is cre
 ##### Fix Insert Operation
 ```
 FUNCTION FIX_INSERT(node):
+	Require: A node from RBT
+	
 	// if both parent and node are red, it violates the 3rd rule
 	WHILE node.parent.color == "red" do 
 		// check if the parent node is left child
@@ -528,7 +657,69 @@ FUNCTION UPDATE_POINTS(node,value)
 
 Since the bronzer tier does not require sorting, we can store the bronze users in a HashMap instead. Once a user reaches 100 points, the user's `node` is inserted into the Silver RBT. 
 
+##### Promotion and Demotion
 
+
+```
+FUNCTION TOP_OR_BTM(RBT,tier)
+	Require: RedBlackTree class of silver ,gold or platinum members that has nodes as elements
+	Require: A string that is either "silver" , "gold" or "platinum"
+
+	toppercent <- 0
+	btmpercent <- 0
+	toppercentlist <- [] //empty array or list
+	btmpercentlist <- [] //empty array or list	
+	
+	IF tier == "silver" do
+		toppercent <- ROUNDDOWN(RBT.size * 0.20) //top 20%
+	ELSE IF tier == "gold" do 
+		btmpercent <- ROUNDDOWN(RBT.size * 0.20) //btm 20%
+		toppercent <- ROUNDDOWN(RBT.size * 0.10) //top 10%
+	ELSE do  //platinum 
+		btmpercent <-ROUNDDOWN(RBT.size * 0.10) //btm 10%
+	
+	IF toppercent != 0 do
+		node <- FIND_MAX(RBT.root)
+		For i = 1 to toppercent:
+			toppercentlist <- toppercentlist + node 
+			node <- FIND_PREDECESSOR(node)
+	IF btmpercent != 0 do
+		node <- FIND_MIN(RBT.root)
+		For i = 1 to btmpercent:
+			btmpercentlist <- btmpercentlist + node
+			node <- FIND_SUCCESSOR(node)
+			
+	return btmpercentlist , toppercentlist
+		
+```
+In order to determine which users are eligible for promoting or demoting, we first identify the membership tier:
+<div align="center">
+  <table>
+    <tr>
+      <th>Tier</th>
+      <th>Top percentage</th>
+      <th>btm percentage</th>
+    </tr>
+    <tr>
+      <td>Silver</td>
+      <td>20%</td>
+      <th>NIL</th>
+    </tr>
+        <tr>
+      <td>Gold</td>
+      <td>10%</td>
+      <td>20%</td>
+    </tr>
+        <tr>
+      <td>Platinum</td>
+      <th>NIL</th>
+      <td>10%</td>
+    </tr>
+  </table>
+</div>
+
+Based on the table above, we calculate the number of users eligible for promotion and demotion. For promotion, we identify the top users by finding the node with the highest points. Then, using the predecessor function, we traverse the graph backwards to find next  with the highest points.
+For demotion, we identify the bottom users by finding the node with the lowest points. Then, using the successor function, we traverse the graph forward to find the next user with the lowest points
 
 whenever user gains likes check which tier, if gold and plat tier , node.update_points += 1 , dislikes , nodes.update_points -=1. 
 
