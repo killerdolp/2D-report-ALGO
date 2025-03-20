@@ -94,28 +94,6 @@ To ensure user engagement and competitive fairness, Gold and Platinum players ha
 A **Silver** user is not able to be demoted to Bronze. This allows the user to have a sense of accomplishment reinforcing a positive user experience. Furthermore, by preventing the demotion to bronze, it ensures motivation for those users who had a temporary decline in activity for the week.
 
 # Algorithms
-The data structure used to store the **User** table would be a HashMap.  HashMap offers average-case O(1) time complexity for insertion, deletion and lookups ,making it much faster than most algorithms. While HashMap has a worst-case time complexity of O(n) due to collisions (adding all into one key) , this can be negated by choosing an effective hash function and maintaining a low load factor. %% and maybe bronze tiers  %% 
-
-```
-Class HashMap():
-	Table <- An array of list     // Create default hash map
-	size <- 0                     //default size
-```
-
-(continue here) 
-
-The algorithm used to store **Reward Points** table would be the **Red-Black Tree** algorithm. It is an modified version of the Binary Search Tree. It is also offers faster insertions and deletions than the AVL tree, due to the lesser amount of rotations when restructuring the tree.
-
-<div align="center">
-<img alt="center" src="telegram-cloud-photo-size-5-6246945506316107709-y.jpg" width="420px" height="300px">
-</div>
-
-In a red-black tree:
-- A node can only be black or red
-- The root and leaf nodes are black
-- If a node is red, then the children nodes are black
-- ALL paths from a node to its descendants should have the same number of black nodes
-
 ##### Node Class
 ```
 Class Node(user_id):
@@ -133,7 +111,33 @@ Class Node(user_id):
 
 The **Node** class contains several key attributes essential for maintaining the Reward points table structure and functionality of a **RBT**. The `color` attribute ensures the tree remains balanced according to Red-Black Tree properties. The `points` attribute stores the user’s reward points, while `tier` represents the user's membership ranking. The `left`, `right`, and `parent` attributes establish links between nodes. Finally, `user_id` uniquely identifies each node, associating it with a specific user.
 
+##### HashMap
+
+The data structure used to store the **User** table would be a HashMap.  HashMap offers average-case O(1) time complexity for insertion, deletion and lookups ,making it much faster than most algorithms. While HashMap has a worst-case time complexity of O(n) due to collisions (adding all into one key) , this can be negated by choosing an effective hash function and maintaining a low load factor. %% and maybe bronze tiers  %% 
+
+```
+Class HashMap():
+	Table <- An array of list     // Create default hash map
+	size <- 0                     //default size
+```
+
+(continue here) 
+
 ##### Red black Tree Class
+
+The algorithm used to store **Reward Points** table would be the **Red-Black Tree** algorithm. It is an modified version of the Binary Search Tree. It is also offers faster insertions and deletions than the AVL tree, due to the lesser amount of rotations when restructuring the tree.
+
+<div align="center">
+<img alt="center" src="telegram-cloud-photo-size-5-6246945506316107709-y.jpg" width="420px" height="300px">
+</div>
+
+In a red-black tree:
+- A node can only be black or red
+- The root and leaf nodes are black
+- If a node is red, then the children nodes are black
+- ALL paths from a node to its descendants should have the same number of black nodes
+
+
 
 ```
 Class RedBlackTree:
@@ -144,7 +148,6 @@ Class RedBlackTree:
 The **RBT** class only contain 2 key attributes, 
 The Node `root`  represents the starting of point of the tree. When the tree is empty, root is NIL as there are no nodes yet. All main operations such as insert, delete and update starts from this `root` node.
 The integer `size` use to retrieve the top people in the scoreboard efficiently
-
 
 ### Sub-Operations
 Before we dive into the main operations for the rewards system, there are some fundamental sub-operations that would be used in the following main operations (insert, delete and update).
@@ -257,11 +260,11 @@ FUNCTION RB_INSERT(RBT,user_id)
 	Require: User_id from the User table
 
 	node <- NEW Node(user_id)
-	node.color <- 1             //make the node red
+	node.color <- "red"             //make the node red
 	node.parent <- NIL 
 	node.left <- NIL
 	node.right <- NIL 
-	node.point <- 0             // new user always starts with 0 points
+	node.point <- "black"             // new user always starts with 0 points
 	
 	IF RBT.root != NIL do
 		node.color <- "black"
