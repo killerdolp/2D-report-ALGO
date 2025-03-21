@@ -42,11 +42,23 @@
 ---
 # Executive summary
 
-The **Tier Membership** system consists of four tiers: **Bronze, Silver, Gold, and Platinum**. Every member starts at the Bronze tier with 0 points. To advance to Silver, a user must accumulate at least **500 points**. However, progression to **Gold** or **Platinum** is competitive and only the top users each week will be able to promote into these tiers, based on a weekly ranking system.
+As tasked by the CEO of YouTwitFace, Denis, our newly formed "Rewards System Team" has designed a database system to store the points/tier for all users of YouTwitFace.
 
-Our proposed solution implements a relational database with 2 tables: a **User table** and a **Reward Points table**. The database's underlying data structure ensures an **O(1)** time complexity whenever the user retrieves their own points. Furthermore, the **User table** would use database indexing to ensure the system lookups would be **O(log n)**.
+Users gain/lose points from their interactions on any of YouTwitFace's platforms, similar to [Reddit's karma](https://support.reddithelp.com/hc/en-us/articles/204511829-What-is-karma) system. On top of the points system, users are categorised into 4 tiers, namely Bronze, Silver, Gold and Platinum. At the end of every week (Sunday 12am), the system will promote/demote users between tiers based on the points that they have accumulated over the past week.
 
-The **Reward Points table** would be implemented as a **Red Black Tree**, which is a type of self-balancing Binary Search Tree (BST). This algorithm provides efficient sorting and searching while maintaining a balanced tree structure, ensuring O(log n) time complexity for search operations. The Red Black Tree offers a better balance between search and update performance as compared to the AVL tree, which has faster lookups at the cost of more rotations to maintain the tree's balance during insertions and deletions.
+Each of YouTwitFace's platforms will offer more benefits for being in a higher tier, such as access to unique emotes, and advertisement skips.
+
+This hybrid points/tier system approach aims to encourage users of YouTwitFace's various platforms to **1. maintain consistent usage**, and **2. reward positive conduct**.
+
+### Maintain Consistent Usage
+By making our promotion/demotion cycles weekly, we aim to encourage users to consistently interact on the platform to rise/maintain their tier level. This protects the tier system against one-hit wonders, where a user gains a high rank for one extraordinary upload/comment.
+### Reward Positive Conduct
+By implementing a system where users can gain/lose points based on their interactions on various platforms, we aim to create a self-moderating ecosystem that encourages positive and inclusive behaviour. This system aims to address SDG goals 3, 5 and 10.
+## Service Requirements
+ The rewards system serves as core service to the various app teams in YouTwitFace, and each app team must be able to:
+- add/retrieve any user's current point and tier
+- increase/reduce points based on a user's usage on any of YouTwitFace's platforms
+- query for an ordered list of users in any of the tiers, when a user wants to view the the leaderboard on any of YouTwitFace's platforms
 
 ---
 # Database diagram
