@@ -42,11 +42,23 @@
 ---
 # Executive summary
 
-The **Tier Membership** system consists of four tiers: **Bronze, Silver, Gold, and Platinum**. Every member starts at the Bronze tier with 0 points. To advance to Silver, a user must accumulate at least **500 points**. However, progression to **Gold** or **Platinum** is competitive and only the top users each week will be able to promote into these tiers, based on a weekly ranking system.
+As tasked by the CEO of YouTwitFace, Denis, our newly formed "Rewards System Team" has designed a database system to store the points/tier for all users of YouTwitFace.
 
-Our proposed solution implements a relational database with 2 tables: a **User table** and a **Reward Points table**. The database's underlying data structure ensures an **O(1)** time complexity whenever the user retrieves their own points. Furthermore, the **User table** would use database indexing to ensure the system lookups would be **O(log n)**.
+Users gain/lose points from their interactions on any of YouTwitFace's platforms, similar to [Reddit's karma](https://support.reddithelp.com/hc/en-us/articles/204511829-What-is-karma) system. On top of the points system, users are categorised into 4 tiers, namely Bronze, Silver, Gold and Platinum. At the end of every week (Sunday 12am), the system will promote/demote users between tiers based on the points that they have accumulated over the past week.
 
-The **Reward Points table** would be implemented as a **Red Black Tree**, which is a type of self-balancing Binary Search Tree (BST). This algorithm provides efficient sorting and searching while maintaining a balanced tree structure, ensuring O(log n) time complexity for search operations. The Red Black Tree offers a better balance between search and update performance as compared to the AVL tree, which has faster lookups at the cost of more rotations to maintain the tree's balance during insertions and deletions.
+Each of YouTwitFace's platforms will offer more benefits for being in a higher tier, such as access to unique emotes, and advertisement skips.
+
+This hybrid points/tier system approach aims to encourage users of YouTwitFace's various platforms to **1. maintain consistent usage**, and **2. reward positive conduct**.
+
+### Maintain Consistent Usage
+By making our promotion/demotion cycles weekly, we aim to encourage users to consistently interact on the platform to rise/maintain their tier level. This protects the tier system against one-hit wonders, where a user gains a high rank for one extraordinary upload/comment.
+### Reward Positive Conduct
+By implementing a system where users can gain/lose points based on their interactions on various platforms, we aim to create a self-moderating ecosystem that encourages positive and inclusive behaviour. This system aims to address SDG goals 3, 5 and 10.
+## Service Requirements
+ The rewards system serves as core service to the various app teams in YouTwitFace, and each app team must be able to:
+- add/retrieve any user's current point and tier
+- increase/reduce points based on a user's usage on any of YouTwitFace's platforms
+- query for an ordered list of users in any of the tiers, when a user wants to view the the leaderboard on any of YouTwitFace's platforms
 
 ---
 # Database diagram
@@ -184,6 +196,7 @@ FUNCTION HM_GETUSER(hashmap,useridkey)
 	return NIL
 ```
 The function `HM_GETUSER`is the most commonly used function in this  data structure.  Since it contains the relevant user information, including the node which contains points and tier. Given its frequent usage, it is **crucial** that the operation for this maintains at least an average case of $O(1)$ time complexity by managing the load factor and choosing a good hash function.
+
 ```
 FUNCTION HM_DELELEUSER(userid)
 	Require: userid of a user class
@@ -203,10 +216,13 @@ FUNCTION HM_DELELEUSER(userid)
 			return "removed"
 	return NIL
 ```
-The function `HM_DELETEUSER` removes a user from the **HashMap** and ensures that their corresponding **tiered data** is also deleted from the appropriate **Red-Black Tree (RBT)** based on their membership tier. The function `DETELE_USER` would be explain more later. [[Report#Delete Operation]]
+The function `HM_DELETEUSER` removes a user from the **HashMap** and ensures that their corresponding **tiered data** is also deleted from the appropriate **Red-Black Tree (RBT)** based on their membership tier. The `DETELE_USER` function would be explain more later. [[Report#Delete Operation]]
 ##### Red black Tree Class
+The algorithm used to store **Reward Points** table would be the **Red-Black Tree** algorithm. It is an modified version of the Binary Search Tree. This are the few reasons why this algorithm was chosen :
+- A normal  Binary Search tree can degrade to $O(n)$ lookup time while RBT maintains at $O(log n)$ time due to its self balancing nature
+- Among all the Binary Search trees, Red Black Tree offers one of the most efficient update times, making it well suited for handling frequent updates in the rewards points table.
+- Better then heap when getting an ordered retrieval. As a min/max heap is great for getting the highest or lowest point, but it is not efficient when doing range queries (E.g. getting top 20% of players).
 
-The algorithm used to store **Reward Points** table would be the **Red-Black Tree** algorithm. It is an modified version of the Binary Search Tree. It is also offers faster insertions and deletions than the AVL tree, due to the lesser amount of rotations when restructuring the tree.
 
 <div align="center">
 <img alt="center" src="telegram-cloud-photo-size-5-6246945506316107709-y.jpg" width="420px" height="300px">
@@ -217,8 +233,6 @@ In a red-black tree:
 - The root and leaf nodes are black
 - If a node is red, then the children nodes are black
 - ALL paths from a node to its descendants should have the same number of black nodes
-
-
 
 ```
 Class RedBlackTree:
@@ -382,7 +396,7 @@ FUNCTION FIND_PREDECESSOR(node):
 (Should i do the actual insert here? but there is no need for it cause when we insert new user, the points value would always be 0)
 ##### Insert operation
 ```
-FUNCTION RB_INSERT(RBT,user_id)
+FUNCTION RB_INSERTNEW(RBT,user_id)
 	Require: RedBlackTree class that has nodes as elements
 	Require: User_id from the User table
 
@@ -397,23 +411,38 @@ FUNCTION RB_INSERT(RBT,user_id)
 		node.color <- "black"
 		RBT.root = node
 		return
+		
+	//find where to insert the node 
+	check_node <- RBT.node
+	node_to_insert_at <- NIL
+	WHILE check_node != NIL do
+		node_to_insert_at <- check_node 
+		IF node.points > check_node.points do 
+			check_node <- check_node.right
+		ELSE
+			check_node <- check_node.left
+	
+	//tells which node is the parent	
+	node.parent <- node_to_insert_at 
 
-	//Find for smallest node
-	smallest_node = RBT.root
-	WHILE smallest_node.left != NIL do
-		smallest_node <- smallest_node.left
-
-	//Add node to the left of this node 
-	smallest_node.left = node 
-	node.parent = smallest_node
+	//is the node is a left or right child
+	IF node_to_insert_at == None:
+		RBT.root <- node 
+	ELIF node.points > node_to_insert_at.points do
+		node_to_insert_at.right <- node 
+	ELSE do
+		node_to_insert_at.right <- node
 
 	//Ensure that the red-black property is maintained
 	RBT.size <- RBT.size + 1
 	FIX_INSERT(node)
 ```
 
-In this implementation, the insert operation is only used when a new user is created. Unlike a normal RBT where nodes are inserted based on their values, every **new** user starts with **0 points**. Thus, the placement in the tree follows a fixed pattern. The pseudocode reflects this by locating the minimum node (the node with the smallest `points`) and adding the new user as a left child. When a new node is added to the BST, this may violate the RBT properties. To fix the tree, a corrective operation called `FIX_INSERT` is applied.
-
+In this implementation, the insert operation is used when a new user is created or when updating the weekly scoreboard. The process follows these steps:
+	1. **Check if the tree is empty:** If the root is empty, the new node is directly set as the root 
+	2. **Find appropriate position :** If the root is not empty, we traverse the tree to locate the correct parent node where the new node is added a leaf.
+	3. **Determine if the node is a left or right child :** Depending on the value of the new node, it is added as either a left or right child of the parent node
+But when a new node is added to the BST, this may violate the RBT properties. Hence, to fix the tree, a corrective operation called `FIX_INSERT` is applied.
 ##### Fix Insert Operation
 ```
 FUNCTION FIX_INSERT(node):
