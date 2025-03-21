@@ -60,29 +60,6 @@ By implementing a system where users can gain/lose points based on their interac
 - increase/reduce points based on a user's usage on any of YouTwitFace's platforms
 - query for an ordered list of users in any of the tiers, when a user wants to view the the leaderboard on any of YouTwitFace's platforms
 
----
-# Database diagram
-==Figure 1== 
-<div align="center">
-<img alt="center" src="Screenshot 2025-03-13 at 7.58.30 PM.png" width="400px" height="200px">
-</div>
-
-==Figure 1== is a high-level overview of the tables. These tables would have a **one to one relationship**, where the `points_id` column in the User table serves as a foreign key referencing the Primary key (`id`) in the Reward_Points table. This ensures that whenever the user's points need to be retrieved and displayed in their own account, it would only take **O(1)** time.
-
-==Figure 2== 
-<div align="center">
-<img alt="center" src="Screenshot 2025-03-14 at 6.07.56 PM.png" width="400px" height="200px">
-</div>
-
-> [!Take note that in Figure 2, the key is used for indexing, while Index (e.g Index:15) points to the actual index in the database]
-
-Searching for a person's username and id in the `users` table could result in $O(n)$ complexity if we use a trivial sequential search approach. To optimise lookups, the **User** table should implement database indexing. This allows the database to jump directly to the relevant sections instead of iterating through the data. As shown in ==Figure 2==, indexing uses a structure, similar to B-tree, which ensures **O(log n)** time complexity for searching.
-
-(maybe add actual example here)
-
-However, **Reward points** table should not use database indexing. This is due to the frequent updates and changes in the table (explained in [[2D report#User Ranking System]]). Although B-tree's are great for searching, they slow down when operations like insert, update and delete happen. These operations add overhead, as for each operation, the database would have to keep rebuilding and reorganising the data structure and possibly rebalancing the trees, slowing down the performance.
-
-(Should i explain b-tree oso??)
 
 ---
 # User Ranking System
@@ -105,7 +82,26 @@ To ensure user engagement and competitive fairness, Gold and Platinum players ha
 
 A **Silver** user is not able to be demoted to Bronze. This allows the user to have a sense of accomplishment reinforcing a positive user experience. Furthermore, by preventing the demotion to bronze, it ensures motivation for those users who had a temporary decline in activity for the week.
 
-# Algorithms
+---
+# Database diagram
+==Figure 1== 
+<div align="center">
+<img alt="center" src="Untitled Diagram.drawio (1).png" width="500px" height="300px">
+</div>
+
+==Figure 1== is a high-level overview of the tables.  The diagram illustrates that the User table contains a User class, which includes a nested Node class along other attributes, detailed below. Each user belongs to **only** one tier at any given moment. This is determined by the attribute `user.node.tier` to which specifies the tier and determine the corresponding table which the user would be stored.
+##### User class 
+```
+Class User:
+	integer userid     
+	Node node
+```
+
+> [!Other attributes, such as username and password exist in the user class, but they are not relevant to the data structure.]
+
+This are 2 main few attributes that are needed in the User class 
+- The `userid` to uniquely identify each user.
+- The `node` a custom class that stores user's points and tier (E.g node.points = 0 and node.tier  ="bronze")
 ##### Node Class
 ```
 Class Node(user_id):
@@ -121,22 +117,13 @@ Class Node(user_id):
 	integer userid <- user_id
 ```
 
-The **Node** class contains several key attributes essential for maintaining the Reward points table structure and functionality of a **RBT**. The `color` attribute ensures the tree remains balanced according to Red-Black Tree properties. The `points` attribute stores the user’s reward points, while `tier` represents the user's membership ranking. The `left`, `right`, and `parent` attributes establish links between nodes. Finally, `user_id` uniquely identifies each node, associating it with a specific user.
+The `Node` class contains several key attributes essential for maintaining the Reward points table structure and functionality of a **RBT**. The `color` attribute ensures the tree remains balanced according to Red-Black Tree properties. The `points` attribute stores the user’s reward points, while `tier` represents the user's membership ranking. The `left`, `right`, and `parent` attributes establish links between nodes. Finally, `user_id` uniquely identifies each node, associating it with a specific user.
 
 
-```
-Class User:
-	integer userid     
-	Node node
-```
+---
 
-> [!Other attributes, such as username and password exist in the user class, but they are not relevant to the data structure.]
-
-This are 2 main few attributes that are needed in the User class 
-- The `userid` to uniquely identify each user.
-- The `node` a custom class that stores user's points and tier (E.g node.points = 0 and node.tier ="bronze")
-
-##### HashMap
+# Algorithms
+## HashMap
 The data structure used to store the **User** table would be a HashMap.  HashMap offers average-case O(1) time complexity for insertion, deletion and lookups ,making it much faster than most algorithms. While HashMap has a worst-case time complexity of $O(n)$ due to collisions (adding all into one key) , this can be negated by choosing an effective hash function and maintaining a low load factor. 
 ```
 Class HashMap():
@@ -217,22 +204,27 @@ FUNCTION HM_DELELEUSER(userid)
 	return NIL
 ```
 The function `HM_DELETEUSER` removes a user from the **HashMap** and ensures that their corresponding **tiered data** is also deleted from the appropriate **Red-Black Tree (RBT)** based on their membership tier. The `DETELE_USER` function would be explain more later. [[Report#Delete Operation]]
-##### Red black Tree Class
-The algorithm used to store **Reward Points** table would be the **Red-Black Tree** algorithm. It is an modified version of the Binary Search Tree. This are the few reasons why this algorithm was chosen :
+## Red black Tree
+The algorithm used to store the points for each tier would be the **Red-Black Tree** algorithm. For every tier except for the Bronze tier, it would have its own RBT tree.
+- Bronze users are stored in a much simpler structure (e.g. an unsorted list or hash table) as sorting is unnecessary. Promotion to silver happens immediately at 100 points and the user is unable to drop back to bronze. 
+- Silver, Gold and Platinum tiers each have there own RBT because sorting is required (only the top / bottom users are eligible for promotion or demotion)
+- When a user is promoted or demoted, they are removed from the current RBT and inserted into the corresponding tier's RBT 
+
+The Red Black Tree is an modified version of the Binary Search Tree. This are the few reasons why this algorithm was chosen :
 - A normal  Binary Search tree can degrade to $O(n)$ lookup time while RBT maintains at $O(log n)$ time due to its self balancing nature
 - Among all the Binary Search trees, Red Black Tree offers one of the most efficient update times, making it well suited for handling frequent updates in the rewards points table.
 - Better then heap when getting an ordered retrieval. As a min/max heap is great for getting the highest or lowest point, but it is not efficient when doing range queries (E.g. getting top 20% of players).
 
-
 <div align="center">
-<img alt="center" src="telegram-cloud-photo-size-5-6246945506316107709-y.jpg" width="420px" height="300px">
+<b>Example of Red Black Tree</b>
+<img alt="center" src="Pasted image 20250321225017.png" width="650px" height="350px">
 </div>
 
-In a red-black tree:
-- A node can only be black or red
-- The root and leaf nodes are black
-- If a node is red, then the children nodes are black
-- ALL paths from a node to its descendants should have the same number of black nodes
+In a red-black tree there are 4 rules to be followed:
+1. A node can only be black or red
+2. The root and leaf nodes are black
+3. If a node is red, then the children nodes are black
+4. ALL paths from a node to its descendants should have the same number of black nodes
 
 ```
 Class RedBlackTree:
@@ -246,7 +238,7 @@ The integer `size` use to retrieve the top people in the scoreboard efficiently
 
 ### Sub-Operations
 Before we dive into the main operations for the rewards system, there are some fundamental sub-operations that would be used in the following main operations (insert, delete and update).
-##### ROTATION  OPERATIONS
+##### Rotation Operation
 ```
 FUNCTION ROTATE_LEFT(RBT,node):
 	Require: RedBlackTree class that has nodes as elements
@@ -310,7 +302,6 @@ These are the 2 types of rotations.
 (Change the colour of the picture and make only A highlight red)
 
 Both ROTATE_LEFT and ROTATE_RIGHT are functions originally used in the Binary Search Tree to help restructure the tree. They are used in RBT to not only help maintain the balanced tree structure but helps to update the colours to preserve RBT properties after some operations.
-
 ##### Move Tree operations
 ```
 FUNCTION MOVETREE(RBT,replacednode,node)
@@ -329,8 +320,6 @@ FUNCTION MOVETREE(RBT,replacednode,node)
 
 The move tree operation  replaces the subtree of `replace` with the subtree of `node`. Which adjusts the parent-child relationship of the node accordingly.
 
-(add more explaination and examples)
-
 ##### In-order Traversal Operation
 ```
 FUNCTION INORDERTRAVERSAL(node,nodelist):
@@ -345,7 +334,7 @@ FUNCTION INORDERTRAVERSAL(node,nodelist):
 	INORDERTRAVERSAL(node.right,nodelist)
 	return nodelist
 ```
-(Explanation)
+The `INORDERTRAVERSAL` function is a recursive algorithm that performs a in order traversal of the binary tree and records the node traversed. An in-order traversal visits the left subtree first, followed by the node then the right subtree. This would return the nodes in ascending order.
 
 ```
 FUNCTION FIND_MAX(node):
@@ -357,7 +346,6 @@ FUNCTION FIND_MAX(node):
 
 	return max_node
 ```
-
 ```
 FUNCTION FIND_MIN(node):
 	Require: A node from RBT
@@ -367,6 +355,7 @@ FUNCTION FIND_MIN(node):
 
 	return min_node
 ```
+The `FIND_MAX` and `FIND_MIN` functions work as the largest value is found in the right most node and the smallest value is found in the left most node. therefore, the function only has to traverse the right or left most node to find the max and min
 
 ```
 FUNCTION FIND_SUCCESSOR(node):
@@ -566,7 +555,7 @@ The delete operation removes a `node` from a Red-Black Tree while ensuring that 
 		If the node has both children, the node would be replaced by the successor(smallest node bigger than node). It starts by looking at the right child, and the `while` loop finds the smallest node in the right subtree.
 		Then, we handle the case where the `minimum node` parent is the `node` to be deleted. Since the `minimum node` is the right child of the `node `that is needed to be deleted,  we would not need to adjust the parent of the right child. 
 		If the `minimum node` parent is not the node to be deleted, we swap the `minimum node` with the `node` to be deleted. 
-Lastly, if the colour of the deleted `node` is black, we would have fix the tree using `DELETE_FIX` to maintain the red-black properties. ~~This is because removing a black node can violate the 4th rule of RBT , which states that every path from the root to the leaf should contain the same number of black nodes. Hence, to restore balance, a correction is need.~~
+Lastly, if the colour of the deleted `node` is black, we would have fix the tree using `DELETE_FIX` to maintain the red-black properties. 
 
 The delete operation is used in two scenarios:
 1. Account Deletion:
@@ -687,10 +676,8 @@ FUNCTION UPDATE_POINTS(node,value)
 Since the bronzer tier does not require sorting, we can store the bronze users in a HashMap instead. Once a user reaches 100 points, the user's `node` is inserted into the Silver RBT. 
 
 ##### Promotion and Demotion
-
-
 ```
-FUNCTION TOP_OR_BTM(RBT,tier)
+FUNCTION TOP_BTM(RBT,tier)
 	Require: RedBlackTree class of silver ,gold or platinum members that has nodes as elements
 	Require: A string that is either "silver" , "gold" or "platinum"
 
@@ -750,9 +737,39 @@ In order to determine which users are eligible for promoting or demoting, we fir
 Based on the table above, we calculate the number of users eligible for promotion and demotion. For promotion, we identify the top users by finding the node with the highest points. Then, using the predecessor function, we traverse the graph backwards to find next  with the highest points.
 For demotion, we identify the bottom users by finding the node with the lowest points. Then, using the successor function, we traverse the graph forward to find the next user with the lowest points
 
-whenever user gains likes check which tier, if gold and plat tier , node.update_points += 1 , dislikes , nodes.update_points -=1. 
+```
+FUNCTION WEEKLY_UPDATE(RBT_silver,RBT_gold,RBT_plat)
+	Require: RedBlackTree class of silver members that has nodes as elements
+	Require: RedBlackTree class of gold members that has nodes as elements
+	Require: RedBlackTree class platinum members that has nodes as elements
+	
+	//promotion from silver to gold 
+	placeholder , topsilverusers <- TOP_BTM(RBT_silver,"silver")
+	FOR node in topsilverusers do 
+		node.tier <- "gold"
+		DELETE_USER(RBT_silver,node)
+		RB_INSERT(RBT_gold,node)
 
-%% What i think need to be done would be to segment the tiers into different RBT(eg RBT_brozne and Silver , RBT gold and RBT plat...  but wait then in this case is there a point in doing RBT_bronze and silver?) %%
+	//demotion from gold to silver and promotion from gold to plat
+	btmgoldusers , topgoldusers <- TOP_BTM(RBT_gold,"gold")
+	//demotion
+	FOR node in btmgoldusers do 
+		node.tier <- "silver"
+		DELETE_USER(RBT_gold,node)
+		RB_INSERT(RBT_silver,node)
+	//promotion
+	FOR node in topgoldusers do 
+		node.tier <- "platinum"
+		DELETE_USER(RBT_gold,node)
+		RB_INSERT(RBT_plat,node)
+
+	//demotion to plat to gold 
+	btmplatusers , placeholder <- TOP_BTM(RBT_plat,"platinum")
+	FOR node in btmplatusers do 
+		node.tier <- "gold"
+		DELETE_USER(RBT_plat,node)
+		RB_INSERT(RBT_gold,node)
+```
 
 
 **References**
