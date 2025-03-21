@@ -89,7 +89,7 @@ A **Silver** user is not able to be demoted to Bronze. This allows the user to h
 <img alt="center" src="Untitled Diagram.drawio (1).png" width="500px" height="300px">
 </div>
 
-==Figure 1== is a high-level overview of the tables.  The diagram illustrates that the User table contains a User class, which includes a nested Node class along other attributes, detailed below. Each user belongs to **only** one tier at any given moment. This is determined by the attribute `user.node.tier` to which specifies the tier and determine the corresponding table which the user would be stored.
+==Figure 1== is a high-level overview of the tables.  The diagram illustrates that the User table contains a User class, which includes a nested Node class along other attributes, detailed below. Each user belongs to **only** one tier at any given moment. This is determined by the attribute `user.node.tier` to which specifies the tier and determine the corresponding table which the user would be stored. For simplicity, we will collectively refer to `Hashmap_bronze` , `rbt_silver` , `rbt_gold` and `rbt_platinum` as the **Rewards Points table**
 ##### User class 
 ```
 Class User:
@@ -205,7 +205,7 @@ FUNCTION HM_DELELEUSER(userid)
 ```
 The function `HM_DELETEUSER` removes a user from the **HashMap** and ensures that their corresponding **tiered data** is also deleted from the appropriate **Red-Black Tree (RBT)** based on their membership tier. The `DETELE_USER` function would be explain more later. [[Report#Delete Operation]]
 ## Red black Tree
-The algorithm used to store the points for each tier would be the **Red-Black Tree** algorithm. For every tier except for the Bronze tier, it would have its own RBT tree.
+The algorithm used to store **Reward point** table for each tier would be the **Red-Black Tree** algorithm. For every tier except for the Bronze tier, it would have its own RBT tree.
 - Bronze users are stored in a much simpler structure (e.g. an unsorted list or hash table) as sorting is unnecessary. Promotion to silver happens immediately at 100 points and the user is unable to drop back to bronze. 
 - Silver, Gold and Platinum tiers each have there own RBT because sorting is required (only the top / bottom users are eligible for promotion or demotion)
 - When a user is promoted or demoted, they are removed from the current RBT and inserted into the corresponding tier's RBT 
@@ -382,7 +382,6 @@ FUNCTION FIND_PREDECESSOR(node):
 		successor <- successor.parent
 ```
 ### Main Operations
-(Should i do the actual insert here? but there is no need for it cause when we insert new user, the points value would always be 0)
 ##### Insert operation
 ```
 FUNCTION RB_INSERTNEW(RBT,user_id)
@@ -770,7 +769,7 @@ FUNCTION WEEKLY_UPDATE(RBT_silver,RBT_gold,RBT_plat)
 		DELETE_USER(RBT_plat,node)
 		RB_INSERT(RBT_gold,node)
 ```
-
+The `WEEKLY_UPDATE` function performs tier promotions and demotions within the reward points table at the end of the week. For each tier , the system retrieves the top and bottom users as needed, updates the tier of the user's node, removes them from their current tier, and inserts them into the appropriate tier.
 
 **References**
 Figure 1: Using https://dbdiagram.io/home to create my own db diagram
