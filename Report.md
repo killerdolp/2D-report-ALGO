@@ -376,10 +376,10 @@ FUNCTION FIND_PREDECESSOR(node):
 	
 	IF node.left != NIL do 
 		return FIND_MAX(node.left)
-	successor <- node.parent
-	WHILE successor != NIL and node = sucessor.left
-		node <- successor
-		successor <- successor.parent
+	predecessor <- node.parent
+	WHILE predecessor != NIL and node == predecessor.left do 
+		node <- predecessor
+		predecessor <- predecessor.parent
 ```
 ### Main Operations
 ##### Insert operation
