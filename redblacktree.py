@@ -1,11 +1,14 @@
+import math
 from collections import deque
 from Node import Node
 
 class RedblackBST():
-    def __init__(self):
+    def __init__(self, tier):
         # set the node as a null node so that we can use it we can use it for dummy variables later
         self.nullnode = Node(0)
         self.root = self.nullnode
+        self.tier = tier
+        self.size = 0
 
 
     def left_rotate(self, node):
@@ -46,6 +49,42 @@ class RedblackBST():
         leftchild.right = node
         node.parent = leftchild
 
+
+    def findmax(self,node):
+        max_node = node
+        while node.right != None:
+            max_node = node.right
+        return max_node
+
+    def findmin(self,node):
+        min_node = node
+        while node.left != None:
+            min_node = node.left
+        return min_node
+
+    def inorder_traversal(self,node,nodelist):
+        if node == None:
+            return nodelist
+        self.inorder_traversal(node.left,nodelist)
+        nodelist.append(node)
+        self.inorder_traversal(node.right,nodelist)
+        return nodelist
+
+    def predecessor(self,node):
+        if node.left != None:
+            return self.findmax(node.right)
+        predecessor = node.parent
+        while predecessor != None and node == predecessor.left:
+            node = predecessor
+            predecessor = predecessor.parent
+
+    def successor(self,node):
+        if node.right != None:
+            return self.findmin(node.left)
+        successor = node.parent
+        while successor != None and node == successor.right:
+            node = successor
+            successor = successor.parent
     #insert operation
     def insert(self, value):
         node = Node(value)
@@ -82,7 +121,7 @@ class RedblackBST():
 
         if node.parent.parent == None:
             return
-
+        self.size += 1
         self.fix_insert(node)
 
     def fix_insert(self, node):
@@ -150,8 +189,10 @@ class RedblackBST():
             return
         orginalColor = node.color
         if node.left == self.nullnode:
+            temp = node.right
             self.replace(node,node.right)
         elif node.right == self.nullnode:
+            temp = node.left
             self.replace(node,node.left)
         else:
             #find for minimum node
@@ -170,57 +211,94 @@ class RedblackBST():
             minimum.left = node.left
             minimum.left.parent = minimum
             minimum.color = node.color
+
+        self.size -= 1
         if orginalColor == 0:
             self.delete_fix(temp)
-    def delete_fix(self, x):
-        while x != self.root and x.color == 0:
-            if x == x.parent.left:
-                s = x.parent.right
-                if s.color == 1:
-                    s.color = 0
-                    x.parent.color = 1
-                    self.left_rotate(x.parent)
-                    s = x.parent.right
 
-                if s.left.color == 0 and s.right.color == 0:
-                    s.color = 1
-                    x = x.parent
+    def delete_fix(self, node):
+        while node != self.root and node.color == 0:
+            if node == node.parent.left:
+                sibling = node.parent.right
+                if sibling.color == 1:
+                    sibling.color = 0
+                    node.parent.color = 1
+                    self.left_rotate(node.parent)
+                    sibling = node.parent.right
+
+                if sibling.left.color == 0 and sibling.right.color == 0:
+                    sibling.color = 1
+                    node = node.parent
                 else:
-                    if s.right.color == 0:
-                        s.left.color = 0
-                        s.color = 1
-                        self.right_rotate(s)
-                        s = x.parent.right
+                    if sibling.right.color == 0:
+                        sibling.left.color = 0
+                        sibling.color = 1
+                        self.right_rotate(sibling)
+                        sibling = node.parent.right
 
-                    s.color = x.parent.color
-                    x.parent.color = 0
-                    s.right.color = 0
-                    self.left_rotate(x.parent)
-                    x = self.root
+                    sibling.color = node.parent.color
+                    node.parent.color = 0
+                    sibling.right.color = 0
+                    self.left_rotate(node.parent)
+                    node = self.root
             else:
-                s = x.parent.left
-                if s.color == 1:
-                    s.color = 0
-                    x.parent.color = 1
-                    self.right_rotate(x.parent)
-                    s = x.parent.left
+                sibling = node.parent.left
+                if sibling.color == 1:
+                    sibling.color = 0
+                    node.parent.color = 1
+                    self.right_rotate(node.parent)
+                    sibling = node.parent.left
 
-                if s.right.color == 0 and s.right.color == 0:
-                    s.color = 1
-                    x = x.parent
+                if sibling.right.color == 0 and sibling.right.color == 0:
+                    sibling.color = 1
+                    node = node.parent
                 else:
-                    if s.left.color == 0:
-                        s.right.color = 0
-                        s.color = 1
-                        self.left_rotate(s)
-                        s = x.parent.left
+                    if sibling.left.color == 0:
+                        sibling.right.color = 0
+                        sibling.color = 1
+                        self.left_rotate(sibling)
+                        sibling = node.parent.left
 
-                    s.color = x.parent.color
-                    x.parent.color = 0
-                    s.left.color = 0
-                    self.right_rotate(x.parent)
-                    x = self.root
-        x.color = 0
+                    sibling.color = node.parent.color
+                    node.parent.color = 0
+                    sibling.left.color = 0
+                    self.right_rotate(node.parent)
+                    node = self.root
+        node.color = 0
+
+    def TOP_BTM(self):
+        toppercent = 0
+        btmpercent = 0
+        toppercentlist =[]
+        btmpercentlist = []
+
+        if self.tier ==  "silver":
+            toppercent= math.floor(self.size * 0.2)
+        elif self.tier == "gold":
+            btmpercent = math.floor(self.size * 0.2)
+            toppercent = math.floor(self.size * 0.1)
+        else:
+            btmpercent = math.floor(self.size * 0.1)
+
+        if toppercent != 0:
+            node = self.findmax(self.root)
+            for i in range(0,toppercent):
+                toppercentlist.append(node)
+                node = self.predecessor(node)
+                if node is None:
+                    break
+
+        if btmpercent != 0:
+            node = self.findmin(self.root)
+            for i in range(0,btmpercent):
+                btmpercentlist.append(node)
+                node = self.successor(node)
+                if node is None:
+                    break
+
+        return btmpercentlist, toppercentlist
+
+
     def print_rbt_top_down(self):
         """ Print the Red-Black Tree in a visually structured format. """
         if not self.root or self.root == self.nullnode:
