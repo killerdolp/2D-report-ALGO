@@ -159,7 +159,7 @@ FUNCTION HM_RESIZETABLE(hashmap)
 	Require: hashmap containing user class
 	
 	new_table_size <- table_size * 2 
-	newtable <-  An array of lists 
+	newtable <-  An array of lists (size of new_table_size)
 
 	FOR each list in hashmap.table do
 		For each (index,user) in list do 
@@ -185,7 +185,8 @@ FUNCTION HM_GETUSER(hashmap,useridkey)
 The function `HM_GETUSER`is the most commonly used function in this  data structure.  Since it contains the relevant user information, including the node which contains points and tier. Given its frequent usage, it is **crucial** that the operation for this maintains at least an average case of $O(1)$ time complexity by managing the load factor and choosing a good hash function.
 
 ```
-FUNCTION HM_DELELEUSER(userid)
+FUNCTION HM_DELELEUSER(RBT,userid)
+	Require: RedBlackTree class of silver ,gold or platinum members that has nodes as elements
 	Require: userid of a user class
 	
 	index <- HM_HASHING(useridkey)
@@ -194,11 +195,11 @@ FUNCTION HM_DELELEUSER(userid)
 			REMOVE user from hashmap.table[index]
 			
 			IF user.tier == "SILVER" do
-				DELETE_USER(RBT_silver,user.node)
+				DELETE_USER(RBT,user.node)
 			ELSE IF user.tier == "GOLD" do
-				DELETE_USER(RBT_gold,user.node)
+				DELETE_USER(RBT,user.node)
 			ELSE IF user.tier == "PLATINUM" do
-				DELETE_USER(RBT_plat,user.node)
+				DELETE_USER(RBT,user.node)
 				
 			return "removed"
 	return NIL
