@@ -99,7 +99,7 @@ Class User:
 
 > [!Other attributes, such as username and password exist in the user class, but they are not relevant to the data structure.]
 
-This are 2 main few attributes that are needed in the User class 
+This are 2 main attributes that are needed in the User class 
 - The `userid` to uniquely identify each user.
 - The `node` a custom class that stores user's points and tier (E.g node.points = 0 and node.tier  ="bronze")
 ##### Node Class
@@ -107,9 +107,9 @@ This are 2 main few attributes that are needed in the User class
 Class Node(user_id):
 	Requires: a new user id from the User table
 	
-	String color  <- "red"       // Default color of new nodes are red
+	String color  <- "red"      // Default color of new nodes are red
 	integer points <- 0         // Default membership points
-	integer weekly_points <-0  // amount of points gained in that week
+	integer weekly_points <-0   // amount of points gained in that week
 	String tier <- "Bronze"     // Default membership tier
 	Node left <- NIL
 	Node right <- NIL
@@ -124,7 +124,7 @@ The `Node` class contains several key attributes essential for maintaining the R
 
 # Algorithms
 ## HashMap
-The data structure used to store the **User** table would be a HashMap.  HashMap offers average-case O(1) time complexity for insertion, deletion and lookups ,making it much faster than most algorithms. While HashMap has a worst-case time complexity of $O(n)$ due to collisions (adding all into one key) , this can be negated by choosing an effective hash function and maintaining a low load factor. 
+The data structure used to store the **User** table would be a HashMap.  HashMap offers average-case $O(1)$ time complexity for insertion, deletion and lookups ,making it much faster than most algorithms. While HashMap has a worst-case time complexity of $O(n)$ due to collisions (adding all into one key) , this can be negated by choosing an effective hash function and maintaining a low load factor. 
 ```
 Class HashMap():
 	Table <- An array of lists     // Create default hash map
@@ -169,7 +169,7 @@ FUNCTION HM_RESIZETABLE(hashmap)
 	Hashmap.table <- newtable 
 	Hashmap.table_size <- new_table_size
 ```
-When the the table exceed threshold ,`HM_RESIZETABLE` is used. This is to prevent excessive collisions and maintain efficiency , ensuring that the worse case $O(n)$ would never happen. This is done by getting all elements in HashMap ,  re-indexing the elements , and adding them to the new table.
+When the the table exceed threshold ,`HM_RESIZETABLE` is used. This is to prevent excessive collisions and maintain efficiency , ensuring that the worse case $O(n)$ would never happen. This is done by making the new table size twice as big, getting all elements in HashMap ,  re-indexing the elements , and adding them to the new table.
 
 ```
 FUNCTION HM_GETUSER(hashmap,useridkey)
@@ -212,8 +212,8 @@ The algorithm used to store **Reward point** table for each tier would be the **
 - When a user is promoted or demoted, they are removed from the current RBT and inserted into the corresponding tier's RBT 
 
 The Red Black Tree is an modified version of the Binary Search Tree. This are the few reasons why this algorithm was chosen :
-- A normal  Binary Search tree can degrade to $O(n)$ lookup time while RBT maintains at $O(log n)$ time due to its self balancing nature
-- Among all the Binary Search trees, Red Black Tree offers one of the most efficient update times, making it well suited for handling frequent updates in the rewards points table.
+- A normal Binary Search tree can degrade to $O(n)$ lookup time while RBT maintains at $O(log n)$ time due to its self balancing nature
+- Among all the Binary Search trees, Red Black Tree offers one of the most efficient update times. Since updates to the rewards points table occur only at the end of the week, requiring $n$ updates but only a single traversal of the graph, the Red-Black Tree is a well-suited choice.
 - Better then heap when getting an ordered retrieval. As a min/max heap is great for getting the highest or lowest point, but it is not efficient when doing range queries (E.g. getting top 20% of players).
 
 <div align="center">
