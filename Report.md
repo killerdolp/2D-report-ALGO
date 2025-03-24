@@ -394,7 +394,7 @@ FUNCTION RB_INSERTNEW(RBT,user_id)
 	node.parent <- NIL 
 	node.left <- NIL
 	node.right <- NIL 
-	node.point <- "black"             // new user always starts with 0 points
+	node.point <- 0             // new user always starts with 0 points
 	
 	IF RBT.root != NIL do
 		node.color <- "black"
