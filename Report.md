@@ -350,6 +350,7 @@ FUNCTION FIND_MAX(node):
 ```
 FUNCTION FIND_MIN(node):
 	Require: A node from RBT
+	
 	min_node <- node
 	WHILE node.left != NIL do
 		min_node <- node.left
@@ -361,6 +362,7 @@ The `FIND_MAX` and `FIND_MIN` functions work as the largest value is found in th
 ```
 FUNCTION FIND_SUCCESSOR(node):
 	Require: A node from RBT
+	
 	//**** CASE 1 ****
 	IF node.right != NIL do 
 		return FIND_MIN(node.right)
@@ -441,10 +443,12 @@ FUNCTION RB_INSERTNEW(RBT,user_id)
 ```
 
 In this implementation, the insert operation is used when a new user is created or when updating the weekly scoreboard. The process follows these steps:
-	1. **Check if the tree is empty:** If the root is empty, the new node is directly set as the root 
-	2. **Find appropriate position :** If the root is not empty, we traverse the tree to locate the correct parent node where the new node is added a leaf.
-	3. **Determine if the node is a left or right child :** Depending on the value of the new node, it is added as either a left or right child of the parent node
-But when a new node is added to the BST, this may violate the RBT properties. Hence, to fix the tree, a corrective operation called `FIX_INSERT` is applied.
+	1. **Check if the tree is empty:** If the root is empty, the new node is directly set as the root ($O(1)$ )
+	2. **Find appropriate position :** If the root is not empty, we traverse the tree to locate the correct parent node where the new node is added a leaf. ($O(log n)$ due to traversing the height of a balanced RBT )
+	3. **Determine if the node is a left or right child :** Depending on the value of the new node, it is added as either a left or right child of the parent node ($O(1)$)
+But when a new node is added to the BST, this may violate the RBT properties. Hence, to fix the tree, a corrective operation called `FIX_INSERT`($O(logn)$ explained below ) is applied.
+And thus, the overall time complexity for `RB_INSERTNEW` is $O(log n)$ 
+
 ##### Fix Insert Operation
 ```
 FUNCTION FIX_INSERT(node):
@@ -465,12 +469,12 @@ FUNCTION FIX_INSERT(node):
 				node <- node.parent.parent
 				
 			//**** CASE 2 ****
-			ELSE IF node == node.parent.right do
-				node <- node.parent
-				LEFT_ROTATE(node) 
+			ELSE do
+				IF node == node.parent.right do
+					node <- node.parent
+					LEFT_ROTATE(node) 
 				
 			//**** CASE 3 ****
-			ELSE do
 				node.parent.color = "black"
 				node.parent.parent.color = "red"
 				RIGHT_ROTATE(node.parent.parent)
@@ -489,12 +493,12 @@ FUNCTION FIX_INSERT(node):
 				node <- node.parent.parent
 				
 			//**** CASE 2 ****
-			ELIF node == node.parent.left do 
-				 node <- node.parent
-				 RIGHT_ROTATE(node)
-				 
+			ELSE do:
+				IF node == node.parent.left do 
+					 node <- node.parent
+					 RIGHT_ROTATE(node)
+				
 			//**** CASE 3 ****
-			ELSE do
 				node.parent.color <- "Black"
 				node.parent.parent.color <- "Red"
 				LEFT_ROTATE(node.parent.parent)
@@ -507,14 +511,13 @@ FUNCTION FIX_INSERT(node):
 
 When inserting a new node, there are 3 cases that could happen that violate the RBT properties:
 - **Case 1:** When the uncle node is red
-	- Set both the uncle and parent node colors to black, and grandparents to red then move up the tree to check for any further violations in the Tree 
+	- Set both the uncle and parent node colours to black, and grandparents to red then move up the tree to check for any further violations in the Tree 
 - **Case 2:** When the uncle node is black and the node is a right child
 	- Call a left rotation on the parent 
 - **Case 3:** When the uncle node is black and the node is a left child 
 	- Set the parent color to black and the grandparent color to red, then perform a left rotate on the the grandparent
 So the pseudocode above checks if there is any **Red-Red violation** with the node and the parent node, then checks if the parent node is a left or right node as this affects the uncle's position. Then it handles any of the 3 cases. If needed, the tree will continue to adjust upwards until the Red-Black Tree properties are fully restored.
-
-(Add why this is log n)
+Since the fix operation only affects $O(1)$ nodes per step and at most $O(log n)$ (same as height of tree). The overall time complexity of `FIX_INSERT` is $O(log n)$.
 ##### Delete Operation
 ```
 FUNCTION DELETE_USER(RBT,node):
@@ -568,7 +571,7 @@ The delete operation removes a `node` from a Red-Black Tree while ensuring that 
 		If the node has both children, the node would be replaced by the successor(smallest node bigger than node). It starts by looking at the right child, and the `while` loop finds the smallest node in the right subtree.
 		Then, we handle the case where the `minimum node` parent is the `node` to be deleted. Since the `minimum node` is the right child of the `node `that is needed to be deleted,  we would not need to adjust the parent of the right child. 
 		If the `minimum node` parent is not the node to be deleted, we swap the `minimum node` with the `node` to be deleted. 
-Lastly, if the colour of the deleted `node` is black, we would have fix the tree using `DELETE_FIX` to maintain the red-black properties. 
+Lastly, if the colour of the deleted `node` is black, we would have fix the tree using `FIX_DELETE` to maintain the red-black properties. 
 
 The delete operation is used in two scenarios:
 1. Account Deletion:
