@@ -356,20 +356,26 @@ FUNCTION FIND_MIN(node):
 
 	return min_node
 ```
-The `FIND_MAX` and `FIND_MIN` functions work as the largest value is found in the right most node and the smallest value is found in the left most node. therefore, the function only has to traverse the right or left most node to find the max and min
+The `FIND_MAX` and `FIND_MIN` functions work as the largest value is found in the right most node and the smallest value is found in the left most node. therefore, the function only has to traverse the right or left most node to find the maximum and minimum.
 
 ```
 FUNCTION FIND_SUCCESSOR(node):
 	Require: A node from RBT
-
+	//**** CASE 1 ****
 	IF node.right != NIL do 
 		return FIND_MIN(node.right)
+	//**** CASE 2 ****
 	successor <- node.parent
-	WHILE successor != NIL and node = sucessor.right
+	WHILE successor != NIL and node = successor.right do 
 		node <- successor
 		successor <- successor.parent
-		
+	return successor	
 ```
+The function `FIND_SUCCESSOR` finds the largest node smaller than the given node. There are 2 cases to find for the successor.
+- **Case 1:** If the node has a right child
+		The successor would be the left most node in the right subtree. We can do this by calling function `FIND_MIN(node.right)`  which returns the left most value in the `node.right` subtree 
+- **Case 2:** If the node has no right child
+		The successor is the first ancestor where the give node is in the left subtree. Until we find such ancestor, we move up the tree using `node.parent`
 
 ```
 FUNCTION FIND_PREDECESSOR(node):
@@ -381,7 +387,14 @@ FUNCTION FIND_PREDECESSOR(node):
 	WHILE predecessor != NIL and node == predecessor.left do 
 		node <- predecessor
 		predecessor <- predecessor.parent
+	return predecessor
 ```
+The function `FIND_PREDECESSOR` finds the smallest node larger than the given node. There are 2 cases to find for the successor.
+- **Case 1:** If the node has a left child
+		The predecessor would be the right most node in the left subtree. We can do this by calling function `FIND_MAX(node.right)`  which returns the right most value in the `node.left` subtree 
+- **Case 2:** If the node has no left child
+		The predecessor is the first ancestor where the give node is in the right subtree. Until we find such ancestor, we move up the tree using `node.parent`
+
 ### Main Operations
 ##### Insert operation
 ```
