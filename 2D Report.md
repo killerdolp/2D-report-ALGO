@@ -1,6 +1,6 @@
 
 ---
-# Title page
+# Team37 Members
 
 <div align="center">
   <table>
@@ -10,31 +10,31 @@
     </tr>
     <tr>
       <td>Ryan</td>
-      <td>Data 2</td>
+      <td>1008153</td>
     </tr>
         <tr>
       <td>Kendrix</td>
-      <td>Data 2</td>
+      <td>1008152</td>
     </tr>
         <tr>
       <td>Shana</td>
-      <td>Data 2</td>
+      <td>1008178</td>
     </tr>
         <tr>
       <td>Jing Jie</td>
-      <td>Data 2</td>
+      <td>1008482</td>
     </tr>
         <tr>
       <td>Darren</td>
-      <td>Data 2</td>
+      <td>1007859</td>
     </tr>
         <tr>
       <td>Gerald</td>
-      <td>Data 2</td>
+      <td>1008135</td>
     </tr>
         <tr>
       <td>Donovan</td>
-      <td>Data 2</td>
+      <td>1008166</td>
     </tr>
   </table>
 </div>
@@ -71,9 +71,9 @@ The ranking system is designed in a way to incentivise user engagement and rewar
 	- Bronze tier users would be promoted to Silver upon obtaining 1000 points.
 	- Users would not be able to demote from Bronze to Silver.
 - **Silver to Gold**
-	- Silver tier users in the top 20% of the weekly leaderboard would be promoted to Gold.
+	- Silver tier users in the top 20% of the weekly leader board would be promoted to Gold.
 - **Gold to Platinum**
-	- Gold tier users in the top 10% of the weekly leaderboard would be promoted to Platinum.
+	- Gold tier users in the top 10% of the weekly leader board would be promoted to Platinum.
    
 #### Demotion Rules
 To ensure user engagement and competitive fairness, Gold and Platinum players have to maintain their rankings.
@@ -89,7 +89,7 @@ A **Silver** user is not able to be demoted to Bronze. This allows the user to h
 <img alt="center" src="Untitled Diagram.drawio (1).png" width="500px" height="300px">
 </div>
 
-==Figure 1== is a high-level overview of the tables.  The diagram illustrates that the User table contains a User class, which includes a nested Node class along other attributes, detailed below. Each user belongs to **only** one tier at any given moment. This is determined by the attribute `user.node.tier` to which specifies the tier and determine the corresponding table which the user would be stored. For simplicity, we will collectively refer to `Hashmap_bronze` , `rbt_silver` , `rbt_gold` and `rbt_platinum` as the **Rewards Points table**
+==Figure 1== is a high-level overview of the tables.  The diagram illustrates that the User table contains a User class, which includes a nested Node class along other attributes, detailed below. Each user belongs to **only** one tier at any given moment. This is determined by the attribute `user.node.tier` to which specifies the tier and determine the corresponding table which the user would be stored. For simplicity, we will collectively refer to  `rbt_silver` , `rbt_gold` and `rbt_platinum` as the **Rewards Points table**
 ##### User class 
 ```
 Class User:
@@ -686,6 +686,7 @@ FUNCTION UPDATE_POINTS(node,value)
 		//Update tier to silver
 		IF node.points > 100 and node.tier == "bronze":
 			node.tier <- "silver"
+			node.points <- 0 
 			RB_INSERT(RBT_silver,node.userid)
 			return "You have reached silver!!"
 ```
@@ -852,6 +853,5 @@ Every Sunday 12am , the demotion and promotion system occurs.  It updates the po
 
 **References**
 Figure 1: Using https://dbdiagram.io/home to create my own db diagram
-Figure 2: https://builtin.com/data-science/b-tree-index
-Figure 3: https://www.geeksforgeeks.org/introduction-to-red-black-tree/
+ https://www.geeksforgeeks.org/introduction-to-red-black-tree/
 
