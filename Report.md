@@ -110,6 +110,7 @@ Class Node(user_id):
 	String color  <- "red"      // Default color of new nodes are red
 	integer points <- 0         // Default membership points
 	integer weekly_points <-0   // amount of points gained in that week
+	integer multiplyer <- 1     // Default to multiply points by
 	String tier <- "Bronze"     // Default membership tier
 	Node left <- NIL
 	Node right <- NIL
@@ -787,6 +788,67 @@ FUNCTION WEEKLY_UPDATE(RBT_silver,RBT_gold,RBT_plat)
 		RB_INSERT(RBT_gold,node)
 ```
 The `WEEKLY_UPDATE` function performs tier promotions and demotions within the reward points table at the end of the week. For each tier , the system retrieves the top and bottom users as needed, updates the tier of the user's node, removes them from their current tier, and inserts them into the appropriate tier.
+
+### Examples 
+Below are the examples of how the main operations are used.
+###### Retrieving user information
+```
+user_information <- HM_GETUSER(userid)
+```
+###### Liking / Disliking / Reporting
+```
+FUNCTION pointsystem(userid,value)
+	Require: User_id from the User table
+	Require: integer value of 1 or -1 only 
+
+	user_information <-  HM_GETUSER(userid)
+	//update points 
+	user_information.weekly_points <- user_information.weekly_points + (value * user_information.mutliplier)
+```
+Whenever a user gets likes or  comments on a post  (+1) , receives a dislike or report (-1), `pointsystem` function will be called to add the score into the user's information.
+
+###### Lucky user / Lucky Tier
+```
+FUNCTION LUCKYUSER(userid,multiplier_value)
+	Require: User_id from the User table
+	Require: integer value to be used for multiplier
+
+	user_information <-  HM_GETUSER(userid)
+	user_information.multiplier <- multiplier_value
+```
+`LUCKYUSER` function is used when only one user or selected users from different tiers are chosen as the lucky users
+
+```
+FUNCTION LUCKYTIER(RBT,multiplier_value)
+	Require: RedBlackTree class of silver ,gold or platinum members that has nodes as elements
+	Require: integer value to be used for multiplier
+	
+	nodes <- INORDERTRAVERSAL(RBT)
+	FOR node in nodes:
+		node.multiplier <- multiplier_value
+```
+The `LUCKYTIER` function is used when an entire tier is selected to receive a multiplier score. It applies the multiplier to all users in the tier.
+
+###### Update weekly scoreboard and display
+```
+UPDATE_RANKINGS(RBT_SILVER)
+UPDATE_RANKINGS(RBT_GOLD)
+UPDATE_RANKINGS(RBT_PLAT)
+
+//Show the rankings/ scoreboard
+silver_usersnode <- INORDERTRAVERSAL(RBT_SILVER)
+gold_usersnode <- INORDERTRAVERSAL(RBT_GOLD)
+plat_usersnode <- INORDERTRAVERSAL(RBT_PLAT)
+
+PRINT silver_usersnode , gold_usersnode , plat_usersnode // for each node, we can get the userid attribute to get the user.
+
+WEEKLY_UPDATE(RBT_SILVER,RBT_GOLD,RBT_PLAT)
+
+```
+Every Sunday 12am , the demotion and promotion system occurs.  It updates the points accumulated in that week and displays the scoreboard. Then, the users would be shifted to their respective tiers based on their performance that week.
+
+
+
 
 **References**
 Figure 1: Using https://dbdiagram.io/home to create my own db diagram
