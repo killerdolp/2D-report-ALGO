@@ -37,10 +37,3 @@ class HashMap:
     def hm_deleteuser(self):
         pass
 
-user_hashmap = HashMap()
-
-user_hashmap.hm_insertnew(User(0,Node(0,0)))
-user_hashmap.hm_insertnew(User(1,Node(1,0)))
-user_hashmap.hm_insertnew(User(2,Node(2,0)))
-user_hashmap.hm_insertnew(User(3,Node(3,0)))
-user_hashmap.hm_insertnew(User(4,Node(4,0)))
