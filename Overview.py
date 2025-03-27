@@ -32,7 +32,7 @@ def weeklyupdate(RBTsilver,RBTgold,RBTplat):
         RBTplat.delete(node)
         RBTgold.insert(node)
 
-def update_points_bronze(node,value):
+def update_points(node,value):
         node.value += (value * node.multiplier)
         if node.value >= 1000 and node.tier == "bronze":
             node.tier = "silver"
@@ -41,8 +41,9 @@ def update_points_bronze(node,value):
             return "User id:"+str( node.userid) + " has reached silver"
 
 
-user_hashmap = HashMap()
 
+user_hashmap = HashMap()
+bronze_HM = HashMap()
 #function to generate users
 def createuser(howmany):
     tiername = ["bronze", "silver", "gold", "platinum"]
@@ -54,44 +55,95 @@ def createuser(howmany):
         if tier == "silver":
             RBTsilver.insert(customnode)
         elif tier =="gold":
-            RBTgold.insert( customnode)
+            RBTgold.insert(customnode)
         elif tier =="platinum":
-            RBTplat.insert( customnode)
+            RBTplat.insert(customnode)
+        else:
+            bronze_HM.hm_insertnew(customnode)
         user_hashmap.hm_insertnew(User(i,customnode ))
 
+def luckytier(tier , multiplier):
+    if tier == "silver":
+        for node in RBTsilver.inorder_traversal(RBTsilver.root,[]):
+            node.multiplier = multiplier
+    elif tier == "gold":
+        for node in RBTgold.inorder_traversal(RBTgold.root,[]):
+            node.multiplier = multiplier
+    elif tier == "platinum":
+        for node in RBTplat.inorder_traversal(RBTplat.root, []):
+            node.multiplier = multiplier
 
-print("CREATING 100 random users, in random tiers")
-createuser(100)
-sleep(1)
+def inputs():
+    inp =0
+    while True:
+        if inp != 0:
+            inp = input("Would you like to continue? (y/n)")
+            if inp == "n":
+                break
+        print("1: Show users in each tier")
+        print("2: Show users in top/bottom of each tier")
+        print("3: Update users")
+        print("4: Update a single user")
+        print("5: Get single user information")
+        print("6: Assign lucky user")
 
-print("\n********Showing RBT silver in-order traversal (ascending order of values) ********")
-print(RBTsilver.inorder_traversal(RBTsilver.root,[]))
-sleep(1)
-print("********Showing RBT gold in-order traversal (ascending order of values)******** ")
-print(RBTgold.inorder_traversal(RBTgold.root,[]))
-sleep(1)
-print("********Showing RBT plat in-order traversal (ascending order of values)********")
-print(RBTplat.inorder_traversal(RBTplat.root,[]))
-sleep(1)
+        inp = input("What would you like to do? Input:")
+        if inp =="1":
+            print("\n********Showing Bronze users ********")
+            print(bronze_HM.getall())
+            sleep(1)
+            print("********Showing RBT silver users using in-order traversal (ascending order of values) ********")
+            print(RBTsilver.inorder_traversal(RBTsilver.root, []))
+            sleep(1)
+            print("********Showing RBT gold users using in-order traversal (ascending order of values)******** ")
+            print(RBTgold.inorder_traversal(RBTgold.root, []))
+            sleep(1)
+            print("********Showing RBT plat users using in-order traversal (ascending order of values)********")
+            print(RBTplat.inorder_traversal(RBTplat.root, []))
+            sleep(1)
+        elif inp == "2":
+            placeholder, topsilver = RBTsilver.TOP_BTM()
+            print("\ntop users in silver     ", str(topsilver))
 
-placeholder , topsilver = RBTsilver.TOP_BTM()
-print("\ntop users in silver     " , str(topsilver))
+            btmgold, topgold = RBTgold.TOP_BTM()
+            print("bottom users in gold    ", str(btmgold))
+            print("top users in gold       ", str(topgold))
 
-btmgold , topgold = RBTgold.TOP_BTM()
-print("bottom users in gold    " , str(btmgold))
-print("top users in gold       " , str(topgold))
+            btmplat, placeholder = RBTplat.TOP_BTM()
+            print("bottom users in platinum", str(btmplat))
+            sleep(1)
+        elif inp == "3":
+            print("Updating users...")
+            sleep(0.5)
+            weeklyupdate(RBTsilver, RBTgold, RBTplat)
+            print("Update done")
+        elif inp == "4":
+            userid = int(input("What is userid of user you would like to change? Input:"))
+            value = int(input("How much to update the points by? Input:"))
+            #finish this
+            user_info = user_hashmap.hm_getuser(userid)
+            update_points(user_info.node,value)
+            print("User " + str(userid) + " points updated.")
+        elif inp == "5":
+            user_id = int(input("What is the user id of user to be retrived? Input:"))
+            user_info = user_hashmap.hm_getuser(user_id)
+            print("\n******** User "+ str(user_id) +" info ********")
+            print("points      : " + str(user_info.node.value))
+            print("multiplier  : " + str(user_info.node.multiplier))
+            print("current tier: " + str(user_info.node.tier))
+        elif inp == "6":
+            userid = int(input("What is userid of user you would like to make as a lucky user? Input:"))
+            value = float(input("How much to multiply the points by?(number above 1.0) Input:"))
+            user_info = user_hashmap.hm_getuser(userid)
+            user_info.node.multiplier = value
+            print("Updated the multiplier!")
+        elif inp == "7":
+            tier = int(input("Which tier would you like to make lucky? (Bronze , Silver , Gold , Platinum) Input:"))
 
-btmplat , placeholder = RBTplat.TOP_BTM()
-print("bottom users in platinum" , str(btmplat))
+        else:
+            print("Invalid input! Please only input numbers from 1 to 7")
 
-#use weekly update function to move the nodes
-weeklyupdate(RBTsilver,RBTgold,RBTplat)
-print("\nAFTER weekly update")
-print("\n********Showing RBT silver in-order traversal (ascending order of values) ********")
-print(RBTsilver.inorder_traversal(RBTsilver.root,[]))
-sleep(1)
-print("********Showing RBT gold in-order traversal (ascending order of values)******** ")
-print(RBTgold.inorder_traversal(RBTgold.root,[]))
-sleep(1)
-print("********Showing RBT plat in-order traversal (ascending order of values)********")
-print(RBTplat.inorder_traversal(RBTplat.root,[]))
+createuser(10)
+print("CREATED 100 random users, in random tiers \n")
+inputs()
+ 
