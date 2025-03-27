@@ -34,6 +34,15 @@ class HashMap:
                 return user
         return None
 
-    def hm_deleteuser(self):
-        pass
+    def hm_deleteuser(self,userid):
+        index = self.hm_hashing(userid)
+        for user in self.table[index]:
+            if user.userid == userid:
+                self.table[index].remove(user)
+    def getall(self):
+        all = []
+        for i in range(self.table_size):
+            for node in self.table[i]:
+                all.append(node)
+        return all
 

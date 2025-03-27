@@ -74,8 +74,16 @@ class RedblackBST():
             nodelist.append(node)  # Append the node itself (or node.value if needed)
             self.inorder_traversal(node.right, nodelist)
 
-
         return nodelist
+
+    def inorder_traversal_withnull(self, node, nodelist):
+        if node is None:
+            return nodelist
+        self.inorder_traversal(node.left, nodelist)
+        nodelist.append(node)
+        self.inorder_traversal(node.right, nodelist)
+        return nodelist
+
 
     def predecessor(self,node):
         if node.left != self.nullnode:
@@ -347,28 +355,3 @@ class RedblackBST():
             print(row.center(max_width))
             if i < max(levels.keys()):
                 print(connectors.center(max_width))
-
-
-# # # Example Usage:
-# rbt = RedblackBST("silver")
-#
-# # Inserting some values
-# rbt.insert(1,50)
-# rbt.insert(2,30)
-# rbt.insert(3,70)
-# rbt.insert(4,20)
-# rbt.insert(5,40)
-# rbt.insert(6,60)
-# rbt.insert(7,80)
-# rbt.insert(8,90)
-# rbt.insert(9,100)
-# rbt.insert(10,110)
-# rbt.insert(11,120)
-#
-#
-# # Printing the Red-Black Tree top-down
-# rbt.print_rbt_top_down()
-# rbt.delete(40)
-# rbt.delete(50)
-# rbt.delete(30)
-# rbt.print_rbt_top_down()
