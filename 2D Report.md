@@ -682,7 +682,7 @@ FUNCTION UPDATE_POINTS(node,value)
 		Require: node from a user_table
 		Require: an integer value
 		
-		node.points <- node.points + value
+		node.points <- node.points + (value * node.multiplier)
 		//Update tier to silver
 		IF node.points > 100 and node.tier == "bronze":
 			node.tier <- "silver"
@@ -808,6 +808,7 @@ FUNCTION pointsystem(userid,value)
 ```
 Whenever a user gets likes or  comments on a post  (+1) , receives a dislike or report (-1), `pointsystem` function will be called to add the score into the user's information.
 
+###### 
 ###### Lucky user / Lucky Tier
 ```
 FUNCTION LUCKYUSER(userid,multiplier_value)
