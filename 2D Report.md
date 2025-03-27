@@ -301,7 +301,6 @@ These are the 2 types of rotations.
 </div>
 
 
-(Change the colour of the picture and make only A highlight red)
 
 Both ROTATE_LEFT and ROTATE_RIGHT are functions originally used in the Binary Search Tree to help restructure the tree. They are used in RBT to not only help maintain the balanced tree structure but helps to update the colours to preserve RBT properties after some operations.
 ##### Move Tree operations
@@ -401,11 +400,10 @@ The function `FIND_PREDECESSOR` finds the smallest node larger than the given no
 ### Main Operations
 ##### Insert operation
 ```
-FUNCTION RB_INSERTNEW(RBT,user_id)
+FUNCTION RB_INSERTNEW(RBT,node)
 	Require: RedBlackTree class that has nodes as elements
 	Require: User_id from the User table
 
-	node <- NEW Node(user_id)
 	node.color <- "red"             //make the node red
 	node.parent <- NIL 
 	node.left <- NIL
@@ -574,6 +572,9 @@ The delete operation removes a `node` from a Red-Black Tree while ensuring that 
 		If the `minimum node` parent is not the node to be deleted, we swap the `minimum node` with the `node` to be deleted. 
 Lastly, if the colour of the deleted `node` is black, we would have fix the tree using `FIX_DELETE` to maintain the red-black properties. 
 
+The overall time complexity of the delete operation is $O(logn)$ This is because locating the node to be deleted takes $O(logn)$, given that the height of a Red-Black Tree is at most $O(logn)$. In Case 3, where the node has two children, finding its successor also takes at most $O(logn)$, as it involves traversing down the tree's height.
+
+
 The delete operation is used in two scenarios:
 1. Account Deletion:
 		When a user deletes their account, the data would be removed from the database and the corresponding node must be removed from **RBT**
@@ -670,11 +671,13 @@ FUNCTION UPDATE_RANKINGS(RBT)
 			updatednode <- new Node(node.weekly_points)
 			updatenode.userid <- node.userid 
 			updatenode.tier <- node.tier
-			INSERT(updatenode)
-			DETELE(node)
+			RB_INSERTNEW(RBT,updatenode)
+			DELETE_USER(RBT,node)
 	
 ```
-The `UPDATE_RANKING` operation would only be used at the end of the week, where the points would be needed to be tallied to determine which user would qualify for a promotion and demotion. The `UPDATE_RANKINGS` works by traversing the tree to get all nodes, and for each node, if the value does not equal to the `weekly_points` , we remove the node and add all important values to the new node with the value of `weekly_points`
+The `UPDATE_RANKING` operation would only be used at the end of the week, where the points would be needed to be tallied to determine which user would qualify for a promotion and demotion. The `UPDATE_RANKINGS` works by traversing the tree to get all nodes, and for each node, if the value does not equal to the `weekly_points` , we remove the node and add all important values to the new node with the value of `weekly_points`.
+
+Since the time complexity is dominated by the for loop, the worse case of the loop would be $O(n) * O(logn)$. This is because we loop through all nodes , and in the worse case we would have to run the INSERT and DELELE operations which are both $O(log n)$
 
 The second update operation is used for tiers of bronze, where the points not in a red-black tree but directly taken form the `User` table HashMap. This operation happens every time the user gains or lose points.
 ```
@@ -850,6 +853,13 @@ WEEKLY_UPDATE(RBT_SILVER,RBT_GOLD,RBT_PLAT)
 Every Sunday 12am , the demotion and promotion system occurs.  It updates the points accumulated in that week and displays the scoreboard. Then, the users would be shifted to their respective tiers based on their performance that week.
 
 
+##### Attachment of python code
+Along with submitting the report and video, Python files containing code for the above operations will also be provided. To run the code, simply execute **`overview.py`**. After running the code, a menu will appear in the terminal. Simply select an option by entering the corresponding number.
+
+Example:
+<div align="center">
+<img alt="center" src="Pasted image 20250328030308.png" width="400px" height="200px">
+</div>
 
 
 **References**
