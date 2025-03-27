@@ -5,7 +5,7 @@ from Node import Node
 class RedblackBST():
     def __init__(self, tier):
         # set the node as a null node so that we can use it we can use it for dummy variables later
-        self.nullnode = Node(0)
+        self.nullnode = Node(-1,0)
         self.root = self.nullnode
         self.tier = tier
         self.size = 0
@@ -49,45 +49,56 @@ class RedblackBST():
         leftchild.right = node
         node.parent = leftchild
 
+    def findmax(self, node):
+        if node is None:
+            return None
 
-    def findmax(self,node):
-        max_node = node
-        while node.right != None:
-            max_node = node.right
-        return max_node
+        while node.right != self.nullnode:
+            node = node.right
+
+        return node
 
     def findmin(self,node):
-        min_node = node
-        while node.left != None:
-            min_node = node.left
-        return min_node
+        if node ==self.nullnode:
+            return None
+        while node.left != self.nullnode:
+            node = node.left
+        return node
 
-    def inorder_traversal(self,node,nodelist):
-        if node == None:
-            return nodelist
-        self.inorder_traversal(node.left,nodelist)
-        nodelist.append(node)
-        self.inorder_traversal(node.right,nodelist)
+    def inorder_traversal(self, node, nodelist=None):
+        if nodelist is None:
+            nodelist = []
+
+        if node != self.nullnode:
+            self.inorder_traversal(node.left, nodelist)
+            nodelist.append(node)  # Append the node itself (or node.value if needed)
+            self.inorder_traversal(node.right, nodelist)
+
+
         return nodelist
 
     def predecessor(self,node):
-        if node.left != None:
-            return self.findmax(node.right)
+        if node.left != self.nullnode:
+            return self.findmax(node.left)
         predecessor = node.parent
-        while predecessor != None and node == predecessor.left:
+        while predecessor is not None and node == predecessor.left:
             node = predecessor
             predecessor = predecessor.parent
 
+        return predecessor
+
     def successor(self,node):
-        if node.right != None:
-            return self.findmin(node.left)
+        if node.right != self.nullnode:
+            return self.findmin(node.right)
         successor = node.parent
         while successor != None and node == successor.right:
             node = successor
             successor = successor.parent
+
+        return successor
     #insert operation
-    def insert(self, value):
-        node = Node(value)
+    def insert(self,node):
+
         node.parent = None
         node.left = self.nullnode
         node.right = self.nullnode
@@ -182,8 +193,7 @@ class RedblackBST():
             deletenode.parent.right = node
         node.parent = deletenode.parent
 
-    def delete(self,key):
-        node = self.search_for_node(self.root,key)
+    def delete(self,node):
         if node == None:
             print("Node does not exist")
             return
@@ -339,26 +349,26 @@ class RedblackBST():
                 print(connectors.center(max_width))
 
 
-# Example Usage:
-rbt = RedblackBST()
-
-# Inserting some values
-rbt.insert(50)
-rbt.insert(30)
-rbt.insert(70)
-rbt.insert(20)
-rbt.insert(40)
-rbt.insert(60)
-rbt.insert(80)
-rbt.insert(90)
-rbt.insert(100)
-rbt.insert(110)
-rbt.insert(120)
-
-
-# Printing the Red-Black Tree top-down
-rbt.print_rbt_top_down()
-rbt.delete(40)
-rbt.delete(50)
-rbt.delete(30)
-rbt.print_rbt_top_down()
+# # # Example Usage:
+# rbt = RedblackBST("silver")
+#
+# # Inserting some values
+# rbt.insert(1,50)
+# rbt.insert(2,30)
+# rbt.insert(3,70)
+# rbt.insert(4,20)
+# rbt.insert(5,40)
+# rbt.insert(6,60)
+# rbt.insert(7,80)
+# rbt.insert(8,90)
+# rbt.insert(9,100)
+# rbt.insert(10,110)
+# rbt.insert(11,120)
+#
+#
+# # Printing the Red-Black Tree top-down
+# rbt.print_rbt_top_down()
+# rbt.delete(40)
+# rbt.delete(50)
+# rbt.delete(30)
+# rbt.print_rbt_top_down()
