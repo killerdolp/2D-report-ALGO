@@ -71,14 +71,14 @@ The ranking system is designed in a way to incentivise user engagement and rewar
 	- Bronze tier users would be promoted to Silver upon obtaining 1000 points.
 	- Users would not be able to demote from Bronze to Silver.
 - **Silver to Gold**
-	- Silver tier users in the top 20% of the weekly leader board would be promoted to Gold.
+	- Silver tier users in the top 20% of the weekly leader board of silver would be promoted to Gold.
 - **Gold to Platinum**
-	- Gold tier users in the top 10% of the weekly leader board would be promoted to Platinum.
+	- Gold tier users in the top 10% of the weekly leader board of gold would be promoted to Platinum.
    
 #### Demotion Rules
 To ensure user engagement and competitive fairness, Gold and Platinum players have to maintain their rankings.
-- If a **Gold** user is in the bottom 20%, the user will be demoted to Silver
-- If a **Platinum** user is in the bottom 10%, the user will be demoted to Gold.
+- If a **Gold** user is in the bottom 20% of gold, the user will be demoted to Silver
+- If a **Platinum** user is in the bottom 10% of platinum, the user will be demoted to Gold.
 
 A **Silver** user is not able to be demoted to Bronze. This allows the user to have a sense of accomplishment reinforcing a positive user experience. Furthermore, by preventing the demotion to bronze, it ensures motivation for those users who had a temporary decline in activity for the week.
 
@@ -134,6 +134,7 @@ Class HashMap():
 	integer total_users_node <- 0
 	load_factor <- 0.75            //Load factor is used for resizing table 
 ```
+The `HashMap` class maintains a hash table where `Table` is an array of lists used for storing user nodes. It has a default size of 100 (`table_size`) and tracks the total number of users or nodes with `total_users_node`. To ensure efficient operations, it uses a `load_factor` of 0.75, meaning the table will be resized when 75% of its capacity is filled. This setup helps balance memory usage and performance, ensuring that operations like insertion, deletion, and lookup remain efficient
 
 ```
 FUNCTION HM_HASHING(userid)
@@ -293,8 +294,6 @@ These are the 2 types of rotations.
     <img src="rotateright.jpg" alt="Image 2" width="35%">
 </div>
 
-
-
 Both ROTATE_LEFT and ROTATE_RIGHT are functions originally used in the Binary Search Tree to help restructure the tree. They are used in RBT to not only help maintain the balanced tree structure but helps to update the colours to preserve RBT properties after some operations.
 ##### Move Tree operations
 ```
@@ -350,7 +349,7 @@ FUNCTION FIND_MIN(node):
 
 	return min_node
 ```
-The `FIND_MAX` and `FIND_MIN` functions work as the largest value is found in the right most node and the smallest value is found in the left most node. therefore, the function only has to traverse the right or left most node to find the maximum and minimum.
+The `FIND_MAX` and `FIND_MIN` functions work as the largest value is found in the right most node and the smallest value is found in the left most node. Therefore, the function only has to traverse the right or left most node to find the maximum and minimum.
 
 ```
 FUNCTION FIND_SUCCESSOR(node):
@@ -500,7 +499,6 @@ FUNCTION FIX_INSERT(node):
 	
 	self.root.color <- "black"
 ```
-
 When inserting a new node, there are 3 cases that could happen that violate the RBT properties:
 - **Case 1:** When the uncle node is red
 	- Set both the uncle and parent node colours to black, and grandparents to red then move up the tree to check for any further violations in the Tree 
@@ -566,7 +564,6 @@ The delete operation removes a `node` from a Red-Black Tree while ensuring that 
 Lastly, if the colour of the deleted `node` is black, we would have fix the tree using `FIX_DELETE` to maintain the red-black properties. 
 
 The overall time complexity of the delete operation is $O(logn)$ This is because locating the node to be deleted takes $O(logn)$, given that the height of a Red-Black Tree is at most $O(logn)$. In Case 3, where the node has two children, finding its successor also takes at most $O(logn)$, as it involves traversing down the tree's height.
-
 
 The delete operation is used in two scenarios:
 1. Account Deletion:
@@ -670,7 +667,7 @@ FUNCTION UPDATE_RANKINGS(RBT)
 ```
 The `UPDATE_RANKING` operation would only be used at the end of the week, where the points would be needed to be tallied to determine which user would qualify for a promotion and demotion. The `UPDATE_RANKINGS` works by traversing the tree to get all nodes, and for each node, if the value does not equal to the `weekly_points` , we remove the node and add all important values to the new node with the value of `weekly_points`.
 
-Since the time complexity is dominated by the for loop, the worse case of the loop would be $O(n) * O(logn)$. This is because we loop through all nodes , and in the worse case we would have to run the INSERT and DELELE operations which are both $O(log n)$
+Since the time complexity is dominated by the for loop, the worse case of the loop would be $O(n) * O(logn)$. This is because we loop through all nodes , and in the worse case we would have to run the INSERT and DELELE operations which are both $O(log n)$. Therefore the time complexity of `UPDATE_RANKINGS` would be $O(logn)$
 
 The second update operation is used for tiers of bronze, where the points not in a red-black tree but directly taken form the `User` table HashMap. This operation happens every time the user gains or lose points.
 ```
@@ -879,7 +876,6 @@ Example:
 <div align="center">
 <img alt="center" src="Pasted image 20250328030308.png" width="400px" height="200px">
 </div>
-
 
 In the case that python code cannot be open or report is glitchy, the files can be found in:
 https://github.com/killerdolp/2D-report-ALGO
