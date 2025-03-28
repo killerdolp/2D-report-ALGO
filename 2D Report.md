@@ -126,11 +126,12 @@ The `Node` class contains several key attributes essential for maintaining the R
 # Algorithms
 ## HashMap
 The data structure used to store the **User** table would be a HashMap.  HashMap offers average-case $O(1)$ time complexity for insertion, deletion and lookups ,making it much faster than most algorithms. While HashMap has a worst-case time complexity of $O(n)$ due to collisions (adding all into one key) , this can be negated by choosing an effective hash function and maintaining a low load factor. 
+The bronze tier would also be stored as a HashMap. This is because the bronze tier **does not** require sorting, and a HashMap provides O(1) time complexity for its operations.
 ```
 Class HashMap():
 	Table <- An array of lists     // Create default hash map
 	integer table_size <- 100      //default size
-	integer total_users <- 0
+	integer total_users_node <- 0
 	load_factor <- 0.75            //Load factor is used for resizing table 
 ```
 
@@ -143,17 +144,17 @@ FUNCTION HM_HASHING(userid)
 The `HM_hashing` function is a sub function used in most HashMap functions. It takes in the `userid` of the user and returns a value index within the HashMap table.
 
 ```
-FUNCTION HM_INSERTNEW(hashmap,user)
+FUNCTION HM_INSERTNEW(hashmap,user_node)
 	Require: hashmap containing user class
-	Require: User class containing userid and node
+	Require: A node class (for bronze tier ) or a User class containing userid and node 
 
 	IF (Hashmap.total_users / Hashmap.table_size) > hashmap.load_factor do
 		HM_RESIZETABLE(Hashmap)
 	index <- HM_HASHING(user.userid)
-	table[index] <- table[index] + user  //insert user into table
+	table[index] <- table[index] + user_node  //insert user or node into table
 	
 ```
-The `HM_INSERTNEW` function is used when a new user creates their account. The main information of the users is then inserted into the HashMap. It function works by checking if the table exceeds the threshold (load factor) and resizes the table using `HM_RESIZETABLE()` then it uses `HM_HASHING` to determine index to store the user at. Using the index, we add the user to the hash table.
+The `HM_INSERTNEW` function is used when a new user creates their account or inserting a node into the bronze tier table. The main information of the users  or the associated node is then inserted into the HashMap. It function works by checking if the table exceeds the threshold (load factor) and resizes the table using `HM_RESIZETABLE()` then it uses `HM_HASHING` to determine index to store the user or node at. Using the index, we add the user or node to the hash table.
 
 ```
 FUNCTION HM_RESIZETABLE(hashmap)
@@ -174,41 +175,33 @@ When the the table exceed threshold ,`HM_RESIZETABLE` is used. This is to preven
 
 ```
 FUNCTION HM_GETUSER(hashmap,useridkey)
-	Require: hashmap containing user class
-	Require: a userid of a User class 
+	Require: hashmap containing user or node class
+	Require: a userid of a User or node class 
 
 	index <- HM_HASHING(useridkey)
-	FOR user in hashmap.table[index]
+	FOR node_user in hashmap.table[index]
 		IF user.userid == useridkey do
-			return user
+			return node_user
 	return NIL
 ```
 The function `HM_GETUSER`is the most commonly used function in this  data structure.  Since it contains the relevant user information, including the node which contains points and tier. Given its frequent usage, it is **crucial** that the operation for this maintains at least an average case of $O(1)$ time complexity by managing the load factor and choosing a good hash function.
 
 ```
-FUNCTION HM_DELELEUSER(RBT,userid)
-	Require: RedBlackTree class of silver ,gold or platinum members that has nodes as elements
-	Require: userid of a user class
-	
-	index <- HM_HASHING(useridkey)
-	FOR user in hashmap.table[index]
-		IF user.userid == useridkey do
-			REMOVE user from hashmap.table[index]
-			
-			IF user.tier == "SILVER" do
-				DELETE_USER(RBT,user.node)
-			ELSE IF user.tier == "GOLD" do
-				DELETE_USER(RBT,user.node)
-			ELSE IF user.tier == "PLATINUM" do
-				DELETE_USER(RBT,user.node)
-				
-			return "removed"
-	return NIL
+FUNCTION HM_DELELE(hashmap,userid)
+	Require: hashmap containing user or node class
+	Require: userid of a user or node class
+
+	index <- HM_HASHING(userid)
+	FOR node_user in hashmap.table[index]
+		IF node_user.userid == useridkey do
+			REMOVE node_user from hashmap.table[index]
+			return node_user
 ```
-The function `HM_DELETEUSER` removes a user from the **HashMap** and ensures that their corresponding **tiered data** is also deleted from the appropriate **Red-Black Tree (RBT)** based on their membership tier. The `DETELE_USER` function would be explain more later. [[Report#Delete Operation]]
+The function `HM_DELETEUSER` is used when a user wants to delete his account or when the user is no longer in the bronze tier. It removes a user or node from the **HashMap** based on the user id. It first determines the index using the function `HM_HASHING(userid)` then iterates through the entries to find and remove the user.
+
 ## Red black Tree
 The algorithm used to store **Reward point** table for each tier would be the **Red-Black Tree** algorithm. For every tier except for the Bronze tier, it would have its own RBT tree.
-- Bronze users are stored in a much simpler structure (e.g. an unsorted list or hash table) as sorting is unnecessary. Promotion to silver happens immediately at 100 points and the user is unable to drop back to bronze. 
+- Bronze users are stored in a much simpler structure (e.g. an unsorted list or hash table) as sorting is unnecessary. Promotion to silver happens immediately at 1000 points and the user is unable to drop back to bronze. 
 - Silver, Gold and Platinum tiers each have there own RBT because sorting is required (only the top / bottom users are eligible for promotion or demotion)
 - When a user is promoted or demoted, they are removed from the current RBT and inserted into the corresponding tier's RBT 
 
@@ -301,7 +294,6 @@ These are the 2 types of rotations.
 </div>
 
 
-(Change the colour of the picture and make only A highlight red)
 
 Both ROTATE_LEFT and ROTATE_RIGHT are functions originally used in the Binary Search Tree to help restructure the tree. They are used in RBT to not only help maintain the balanced tree structure but helps to update the colours to preserve RBT properties after some operations.
 ##### Move Tree operations
@@ -401,11 +393,10 @@ The function `FIND_PREDECESSOR` finds the smallest node larger than the given no
 ### Main Operations
 ##### Insert operation
 ```
-FUNCTION RB_INSERTNEW(RBT,user_id)
+FUNCTION RB_INSERTNEW(RBT,node)
 	Require: RedBlackTree class that has nodes as elements
 	Require: User_id from the User table
 
-	node <- NEW Node(user_id)
 	node.color <- "red"             //make the node red
 	node.parent <- NIL 
 	node.left <- NIL
@@ -574,6 +565,9 @@ The delete operation removes a `node` from a Red-Black Tree while ensuring that 
 		If the `minimum node` parent is not the node to be deleted, we swap the `minimum node` with the `node` to be deleted. 
 Lastly, if the colour of the deleted `node` is black, we would have fix the tree using `FIX_DELETE` to maintain the red-black properties. 
 
+The overall time complexity of the delete operation is $O(logn)$ This is because locating the node to be deleted takes $O(logn)$, given that the height of a Red-Black Tree is at most $O(logn)$. In Case 3, where the node has two children, finding its successor also takes at most $O(logn)$, as it involves traversing down the tree's height.
+
+
 The delete operation is used in two scenarios:
 1. Account Deletion:
 		When a user deletes their account, the data would be removed from the database and the corresponding node must be removed from **RBT**
@@ -670,11 +664,13 @@ FUNCTION UPDATE_RANKINGS(RBT)
 			updatednode <- new Node(node.weekly_points)
 			updatenode.userid <- node.userid 
 			updatenode.tier <- node.tier
-			INSERT(updatenode)
-			DETELE(node)
+			RB_INSERTNEW(RBT,updatenode)
+			DELETE_USER(RBT,node)
 	
 ```
-The `UPDATE_RANKING` operation would only be used at the end of the week, where the points would be needed to be tallied to determine which user would qualify for a promotion and demotion. The `UPDATE_RANKINGS` works by traversing the tree to get all nodes, and for each node, if the value does not equal to the `weekly_points` , we remove the node and add all important values to the new node with the value of `weekly_points`
+The `UPDATE_RANKING` operation would only be used at the end of the week, where the points would be needed to be tallied to determine which user would qualify for a promotion and demotion. The `UPDATE_RANKINGS` works by traversing the tree to get all nodes, and for each node, if the value does not equal to the `weekly_points` , we remove the node and add all important values to the new node with the value of `weekly_points`.
+
+Since the time complexity is dominated by the for loop, the worse case of the loop would be $O(n) * O(logn)$. This is because we loop through all nodes , and in the worse case we would have to run the INSERT and DELELE operations which are both $O(log n)$
 
 The second update operation is used for tiers of bronze, where the points not in a red-black tree but directly taken form the `User` table HashMap. This operation happens every time the user gains or lose points.
 ```
@@ -790,11 +786,36 @@ FUNCTION WEEKLY_UPDATE(RBT_silver,RBT_gold,RBT_plat)
 ```
 The `WEEKLY_UPDATE` function performs tier promotions and demotions within the reward points table at the end of the week. For each tier , the system retrieves the top and bottom users as needed, updates the tier of the user's node, removes them from their current tier, and inserts them into the appropriate tier.
 
-### Examples 
+
+---
+## Examples 
 Below are the examples of how the main operations are used.
+
+###### Creating a new user
+```
+usernode <- new Node(userid)
+newuser <-new User(userid,usernode)
+HM_INSERTNEW(user_hashmap,newuser)
+```
+To create a new user, we must add the corresponding information into the relevant classes first , then add it into the HashMap
+
+###### Deleting a user
+```
+user <- HM_DELELE(user_hashmap,userid) //pops the user class
+
+IF user.node.tier == "SILVER" do
+	DELETE_USER(RBT,user.node)
+ELSE IF user.node.tier == "GOLD" do
+	DELETE_USER(RBT,user.node)
+ELSE IF user.node.tier == "PLATINUM" do
+	DELETE_USER(RBT,user.node)
+ELSE:
+	HM_DELETE(bronze_hashmap,userid)
+```
+When deleting a user, we also need to remove their node from the rewards points table. By first popping the node from the user HashMap after deletion, we can determine the tier the user belonged to and then proceed to delete the corresponding node from the rewards points table.
 ###### Retrieving user information
 ```
-user_information <- HM_GETUSER(userid)
+user_information <- HM_GETUSER(user_hashmap,userid)
 ```
 ###### Liking / Disliking / Reporting
 ```
@@ -850,9 +871,21 @@ WEEKLY_UPDATE(RBT_SILVER,RBT_GOLD,RBT_PLAT)
 Every Sunday 12am , the demotion and promotion system occurs.  It updates the points accumulated in that week and displays the scoreboard. Then, the users would be shifted to their respective tiers based on their performance that week.
 
 
+---
+## Attachment of python code
+Along with submitting the report and video, Python files containing code for the above operations will also be provided. To run the code, simply execute **`overview.py`**. After running the code, a menu will appear in the terminal. Simply select an option by entering the corresponding number.
 
+Example:
+<div align="center">
+<img alt="center" src="Pasted image 20250328030308.png" width="400px" height="200px">
+</div>
+
+
+In the case that python code cannot be open or report is glitchy, the files can be found in:
+https://github.com/killerdolp/2D-report-ALGO
+
+---
 
 **References**
-Figure 1: Using https://dbdiagram.io/home to create my own db diagram
- https://www.geeksforgeeks.org/introduction-to-red-black-tree/
-
+Using https://app.diagrams.net/ create my own diagram
+Use https://www.geeksforgeeks.org/introduction-to-red-black-tree to understand red black trees
